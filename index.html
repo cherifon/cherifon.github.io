@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Terminal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="terminal-window" >
+        <div class="terminal-header">cherif@kali:~</div>
+
+        <!-- whoami -->
+        <div class="initial-content command-line">
+            <span class="prompt">cherif@kali:~$</span>
+            <span>whoami</span>
+        </div>
+        <p class="initial-content">Bonjour, je suis Cherif Jebali, passionné de cybersécurité et pentest.</p>
+
+        <!-- ls -->
+        <div class="initial-content command-line">
+            <span class="prompt">cherif@kali:~$</span>
+            <span>ls</span>
+        </div>
+        <ul class="initial-content">
+            <li>whoami</li>
+            <li>Projets</li>
+            <li>Certifications</li>
+            <li>Expériences</li>
+            <li>Contact.txt</li>
+        </ul>
+
+        <!-- Contact -->
+        <div class="initial-content command-line">
+            <span class="prompt">cherif@kali:~$</span>
+            <span>cat contact.txt</span>
+        </div>
+        <p class="initial-content"> Github : <a href="https://github.com/cherifon" target="_blank"> Cherifon </a> </p>
+        <p class="initial-content">Email : <a href="mailto:tonemail@example.com">cherifjebali0301@gmail.com</a></p>
+
+        <!-- Ligne de commande interactive -->
+        <div class="command-line">
+            <span class="prompt">cherif@kali:~$</span>
+            <input id="terminal-input" type="text" autofocus autocomplete="off" placeholder="Tapez une commande">
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
