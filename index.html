@@ -10,38 +10,103 @@
     <div class="terminal-window" >
         <div class="terminal-header">cherif@kali:~</div>
 
-        <!-- whoami -->
+        <!-- presentation -->
         <div class="initial-content command-line">
             <span class="prompt">cherif@kali:~$</span>
-            <span>whoami</span>
+            <span>echo "Bienvenue sur mon portfolio interactif !"</span>
         </div>
-        <p class="initial-content">Bonjour, je suis Cherif Jebali, passionné de cybersécurité et pentest.</p>
 
-        <!-- ls -->
+        <div class="terminal-card initial-content">
+            <div class="header">
+                <span class="highlight">Cherif Jebali</span>
+                <div class="tags">
+                    <span class="tag">Cybersécurité</span>
+                    <span class="tag">Pentesting</span>
+                    <span class="tag">IA</span>
+                </div>
+            </div>
+
+            <div class="section description">
+                <p>Je m'appelle Cherif Jebali, étudiant en troisième année de mathématiques appliquées et informatique.</p>
+                <p>Passionné par la cybersécurité, le pentesting et l'IA, je développe régulièrement des outils de sécurité pour tester et renforcer la résilience des systèmes.</p>
+            </div>
+
+            <div class="command-hint">
+                <p>Ce terminal interactif a été conçu pour présenter mes compétences, mes projets et mes expériences dans un format original inspiré de l'environnement Kali Linux.</p>
+                <p>Tapez <span class="cmd">-h</span> ou <span class="cmd">--help</span> pour voir les commandes disponibles.</p>
+            </div>
+        </div>
+
+        <!-- ls initial -->
         <div class="initial-content command-line">
             <span class="prompt">cherif@kali:~$</span>
             <span>ls</span>
         </div>
-        <ul class="initial-content">
-            <li>whoami</li>
-            <li>Projets</li>
-            <li>Certifications</li>
-            <li>Expériences</li>
-            <li>Contact.txt</li>
-        </ul>
-
-        <!-- Contact -->
-        <div class="initial-content command-line">
-            <span class="prompt">cherif@kali:~$</span>
-            <span>cat contact.txt</span>
+        <div class="directory-list initial-content">
+            <span class="directory">projets/</span>
+            <span class="directory">certifications/</span>
+            <span class="directory">experiences/</span>
+            <span class="file">contact.txt</span>
+            <span class="command">whoami</span>
         </div>
-        <p class="initial-content"> Github : <a href="https://github.com/cherifon" target="_blank"> Cherifon </a> </p>
-        <p class="initial-content">Email : <a href="mailto:tonemail@example.com">cherifjebali0301@gmail.com</a></p>
 
-        <!-- Ligne de commande interactive -->
+        <!-- Ligne de commande interactive-->
         <div class="command-line">
             <span class="prompt">cherif@kali:~$</span>
             <input id="terminal-input" type="text" autofocus autocomplete="off" placeholder="Tapez une commande">
+        </div>
+    </div>
+
+    <!-- Contenu des commandes -->
+
+    <!-- whoami -->
+    <div id="whoami-content" style="display: none;">
+        <div class="terminal-card">
+            <div class="header">
+                <span class="highlight">Cherif Jebali</span>
+                <div class="tags">
+                    <span class="tag">Cybersécurité</span>
+                    <span class="tag">Pentesting</span>
+                    <span class="tag">IA</span>
+                </div>
+            </div>
+
+            <div class="section description">
+                <h3>$ whoami</h3>
+                <p>Étudiant passionné en troisième année de mathématiques appliquées et informatique.</p>
+                <p>Spécialisé en cybersécurité et pentesting, je développe activement des outils pour tester et renforcer la sécurité des systèmes.</p>
+                <p>Mon objectif est de contribuer à la protection des infrastructures numériques en combinant expertise technique et approche analytique.</p>
+            </div>
+
+            <div class="section">
+                <h3>$ Formation</h3>
+                <p>└── Licence en mathématiques appliquées et informatique à Paris-Dauphine</p>
+            </div>
+
+            <div class="section">
+                <h3>$ Intérêts</h3>
+                <p>├── Cybersécurité</p>
+                <p>├── Pentesting</p>
+                <p>├── Analyse de données</p>
+                <p>└── Intelligence Artificielle</p>
+            </div>
+
+            <div class="section">
+                <h3>$ Compétences Techniques</h3>
+                <p>├── Languages: Python, C, Java, R, SQL</p>
+                <p>├── Outils: Kali Linux, Nmap, Wireshark</p>
+                <p>└── Plateformes: GitHub, Hack The Box, Hack This Site</p>
+            </div>
+
+            <div class="section">
+                <h3>$ Projets en cours</h3>
+                <p>└── Développement de honeypots pour la détection d'intrusions</p>
+            </div>
+
+            <div class="command-hint">
+                Tapez <span class="cmd">ls</span> pour voir mes projets, certifications et expériences.
+                ou <span class="cmd">-h</span> pour la liste des commandes.
+            </div>
         </div>
     </div>
 
