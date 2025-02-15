@@ -55,3 +55,236 @@ body {
     font-family: inherit;
     font-size: 1rem;
 }
+
+/* Styles pour les cards de projet */
+.project-card {
+    background: var(--terminal-bg);
+    color: var(--terminal-text);
+    padding: 15px;
+    border: 1px solid var(--terminal-border);
+    margin: 10px 0;
+    font-family: 'Fira Code', monospace;
+}
+
+.project-card h2 {
+    color: #0f0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.project-card img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border: 1px solid var(--terminal-border);
+}
+
+.project-card .tags {
+    margin: 10px 0;
+}
+
+.project-card .tag {
+    background: #333;
+    color: #0f0;
+    padding: 2px 8px;
+    margin-right: 5px;
+    border: 1px solid #0f0;
+    font-size: 0.9em;
+}
+
+.project-card ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.project-card li::before {
+    content: "$ ";
+    color: #0f0;
+}
+
+.project-card .project-links {
+    margin-top: 15px;
+}
+
+.project-card .project-links a {
+    color: #0f0;
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+.project-card .project-links a:hover {
+    text-decoration: underline;
+}
+
+.project-card .project-links a::before {
+    content: "> ";
+}
+
+.project-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.tag {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.project-links {
+    margin-top: 15px;
+}
+
+.project-links a {
+    display: inline-block;
+    padding: 5px 15px;
+    margin-right: 10px;
+    background: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.project-links a:hover {
+    background: #2980b9;
+}
+
+/* Styles pour ls */
+.directory {
+    color: #00ff00; /* Vert pour les dossiers */
+    font-weight: bold;
+}
+
+.file-text {
+    color: #00ffff; /* Cyan pour les fichiers avec contenu HTML */
+}
+
+.file-simple {
+    color: #ffffff; /* Blanc pour les fichiers texte simples */
+}
+
+/* Pour garder l'espacement entre les éléments */
+.response span {
+    margin-right: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+.terminal-card {
+    border: 1px solid var(--terminal-border);
+    padding: 15px;
+    margin: 10px 0;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.terminal-card .header {
+    margin-bottom: 20px;
+}
+
+.terminal-card .highlight {
+    color: #00ff00;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.terminal-card .section {
+    margin: 15px 0;
+}
+
+.terminal-card h3 {
+    color: #00ff00;
+    margin: 10px 0;
+}
+
+.terminal-card p {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.terminal-card .tags {
+    margin: 10px 0;
+}
+
+.terminal-card .tag {
+    background: #333;
+    color: #00ff00;
+    padding: 2px 8px;
+    margin-right: 5px;
+    border: 1px solid #00ff00;
+}
+
+.terminal-card .command-hint {
+    margin-top: 20px;
+    color: #666;
+}
+
+.terminal-card .cmd {
+    color: #00ff00;
+    background: #333;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.terminal-card .description {
+    border-left: 2px solid #00ff00;
+    padding-left: 15px;
+    margin: 20px 0;
+}
+
+.terminal-card .description p {
+    color: #cccccc;
+    line-height: 1.5;
+    margin: 10px 0;
+    padding-left: 0;
+}
+
+.directory-list {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.directory-list span {
+    margin-right: 15px;
+    font-family: 'Courier New', monospace;
+}
+
+.directory-list .directory {
+    color: #00ff00;
+}
+
+.directory-list .file {
+    color: #ffffff;
+}
+
+.directory-list .command {
+    color: #00ffff;
+}
+
+/* Pour l'espacement entre les éléments */
+.directory-list span:not(:last-child) {
+    margin-right: 15px;
+}
+
+.command-hint {
+    margin-top: 15px;
+    border-top: 1px solid var(--terminal-border);
+    padding-top: 15px;
+}
+
+.command-hint .cmd {
+    background: #333;
+    color: #00ff00;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
