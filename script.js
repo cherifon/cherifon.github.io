@@ -4,6 +4,11 @@ let currentDirectory = "root"; // Répertoire actuel, initialement à la racine
 let commandHistory = [];
 let historyIndex = -1;
 
+// Ajouter cette fonction helper au début du fichier
+function normalizeCommand(input) {
+    return input.toLowerCase().trim();
+}
+
 // Structure des dossiers et fichiers
 const fileSystem = {
     root: {
@@ -174,7 +179,7 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
                 else {
                     // Suggérer les commandes de base qui commencent par la saisie
                     const baseCommands = ["-h", "--help", "whoami", "ls", "cd", "cat"];
-                    suggestions = baseCommands.filter(cmd => cmd.startsWith(currentValue));
+                    suggestions = baseCommands.filter(cmd => cmd.startsWith(currentValue.toLowerCase()));
                 }
             }
             // Si on a un début d'argument
@@ -257,7 +262,7 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
         response.className = "response";
 
         switch (true) { // Utilise true pour évaluer les conditions
-            case input === "-h" || input === "--help":
+            case normalizeCommand(input) === "-h" || normalizeCommand(input) === "--help":
                 response.innerHTML = `
                     Commandes disponibles :
                     <ul>
@@ -269,12 +274,12 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
                 `;
                 break;
         
-            case input === "whoami":
+            case normalizeCommand(input) === "whoami":
                 const projetsContent = document.getElementById("whoami-content").innerHTML;
                 response.innerHTML = projetsContent;
                 break;
         
-            case input === "ls":    
+            case normalizeCommand(input) === "ls":    
                 if (fileSystem[currentDirectory]) {
                     const currentDirectoryContent = Object.keys(fileSystem[currentDirectory]);
                     response.innerHTML = formatLsOutput(currentDirectoryContent, currentDirectory);
@@ -283,12 +288,12 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
                 }
                 break;
 
-            case input === "cd":
+            case normalizeCommand(input) === "cd":
                 response.textContent = "Répertoir actuel : " + currentDirectory;
                 break;
         
-            case input.startsWith("cd "):
-                const directory = input.split(" ")[1]; // Récupérer le nom du répertoire
+            case normalizeCommand(input).startsWith("cd "):
+                const directory = input.split(" ")[1]; // On garde la casse originale pour le nom du répertoire
                 if (fileSystem[directory]) {
                     currentDirectory = directory;
                     response.textContent = `Répertoire changé pour "${directory}".`;
@@ -302,8 +307,8 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
                 }
                 break;
         
-            case input.startsWith("cat "): 
-                const file = input.split(" ")[1];
+            case normalizeCommand(input).startsWith("cat "): 
+                const file = input.split(" ")[1]; // On garde la casse originale pour le nom du fichier
                 if (fileSystem[currentDirectory] && fileSystem[currentDirectory][file]) {
                     const fileData = fileSystem[currentDirectory][file];
                     if (typeof fileData === 'object') {
@@ -341,7 +346,7 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
 // Ajouter un écouteur d'événements pour l'input
 document.getElementById("terminal-input").addEventListener("input", function(event) {
     const currentValue = this.value.trim();
-    const [command, arg] = currentValue.split(" ");
+    const [command, arg] = currentValue.toLowerCase().split(" ");
 
     // Réinitialiser les suggestions
     suggestions = [];
