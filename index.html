@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio Terminal</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script> <!-- defer permet de charger le script après le chargement de la page -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="terminal-window" >
@@ -33,7 +35,7 @@
 
             <div class="command-hint">
                 <p>Ce terminal interactif a été conçu pour présenter mes compétences, mes projets et mes expériences dans un format original inspiré de l'environnement Kali Linux.</p>
-                <p>Tapez <span class="cmd">-h</span> ou <span class="cmd">--help</span> pour voir les commandes disponibles.</p>
+                <p>Tapez <span class="cmd">whoami</span> pour en savoir plus sur moi, <span class="cmd">home</span> pour revenir vers le menu principal et <span class="cmd">-h</span> pour la liste des commandes.</p>
             </div>
         </div>
 
@@ -46,8 +48,7 @@
             <span class="directory">projets/</span>
             <span class="directory">certifications/</span>
             <span class="directory">experiences/</span>
-            <span class="file">contact.txt</span>
-            <span class="command">whoami</span>
+            <span class="file">contact.txt</span>s
         </div>
 
         <!-- Ligne de commande interactive-->
@@ -109,7 +110,5 @@
             </div>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
