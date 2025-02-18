@@ -9,87 +9,458 @@ function normalizeCommand(input) {
     return input.toLowerCase().trim();
 }
 
+// Ajouter au début du fichier, après les autres variables globales
+const initialContent = `
+    <div class="terminal-card">
+        <div class="header">
+            <span class="highlight">Cherif Jebali</span>
+            <div class="tags">
+                <span class="tag">Cybersécurité</span>
+                <span class="tag">Pentesting</span>
+                <span class="tag">IA</span>
+            </div>
+        </div>
+
+        <div class="section description">
+            <p>Je m'appelle Cherif Jebali, étudiant en troisième année de mathématiques appliquées et informatique.</p>
+            <p>Passionné par la cybersécurité, le pentesting et l'IA, je développe régulièrement des outils de sécurité pour tester et renforcer la résilience des systèmes.</p>
+        </div>
+
+        <div class="command-hint">
+            <p>Ce terminal interactif a été conçu pour présenter mes compétences, mes projets et mes expériences dans un format original inspiré de l'environnement Kali Linux.</p>
+            <p>Tapez <span class="cmd">whoami</span> pour en savoir plus sur moi, <span class="cmd">home</span> pour revenir vers le menu principal et <span class="cmd">-h</span> pour la liste des commandes.</p>
+        </div>
+    </div>
+`;
+
 // Structure des dossiers et fichiers
 const fileSystem = {
     root: {
         "projets": {
-            "Cybersecurity-Tools.txt": {
+            "Pentesting-et-Bug-Bounty.txt": {
                 content: `
                     <div class="project-card">
-                        <h2>Outils de Cybersécurité</h2>
-                        <img src="assets/projects/cyber-tools.png" alt="Outils Cybersécurité">
+                        <h2>Pentesting et Bug Bounty</h2>
                         <div class="tags">
-                            <span class="tag">Python</span>
                             <span class="tag">Pentest</span>
                             <span class="tag">Sécurité</span>
                         </div>
-                        <p>Suite d'outils développés pour les tests de pénétration:</p>
+                        <p>Participation active sur des plateformes comme Hack The Box (HTB) et Hack This Site :</p>
                         <ul>
-                            <li>Scanner de vulnérabilités</li>
-                            <li>Analyseur de trafic réseau</li>
-                            <li>Détecteur d'injections SQL</li>
+                            <li>Exploitation de vulnérabilités (SQL injection, path traversal, commande injection...)</li>
+                            <li>Utilisation d'outils comme Nmap et Burp Suite de la reconnaissance et l'analyse de systèmes</li>
+                            <li>Identification de faille sur des applications web et mise en œuvre de failles pour les exploiter</li>
                         </ul>
                         <div class="project-links">
-                            <a href="https://github.com/username/cyber-tools" target="_blank">GitHub</a>
-                            <a href="https://demo-link.com" target="_blank">Démo</a>
+                            <a href="https://app.hackthebox.com/profile/638392" target="_blank">Voir mon profil Hack The Box</a>
+                            <a href="https://github.com/cherifon/HackTheBox" target="_blank">Voir mes write-ups</a>
                         </div>
                     </div>
                 `
             },
-            "HackTheBox-Writeups.txt" : "Une collection de write-ups détaillant la résolution des challenges et des machines virtuelles de Hack The Box.",
-            "Java-Web-Crawler.txt" : "Un crawler web développé en Java qui explore des pages web et extrait des données structurées.",
-            "Gestionnaire-de-Tournoi.txt" : "Un gestionnaire de tournoi développé en Java intégrant une base de données en SQL pour suivre les scores et les classements.",
-            "CO2-Forecasting.txt" : "Un projet de prédiction de la concentration de CO2 dans l'air en utilisant des méthodes de machine learning et des données collectées sur une période de plusieurs semaines."
+            "Scripts-Cybersecurite.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Scripts pour la Cybersécurité</h2>
+                        <div class="tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">Bash</span>
+                        </div>
+                        <p>Développement de scripts Python et Bash :</p>
+                        <ul>
+                            <li>Scanner de ports pour l'analyse de la surface d'attaque</li>
+                            <li>Simulation d'attaques DDoS ou de flooding utilisant Scapy</li>
+                            <li>Automatisation de scans et de tests sur des cibles définies</li>
+                            <li>Attaques de mots de passe sur SSH et Telnet</li>
+                        </ul>
+                        <div class="project-links">
+                            <a href="https://github.com/cherifon/Cybersecurity-Tools" target="_blank">Voir le dépôt GitHub</a>
+                        </div>
+                    </div>
+                `
+            },
+            "Web-Crawler-Java.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Web Crawler en Java</h2>
+                        <div class="tags">
+                            <span class="tag">Java</span>
+                            <span class="tag">Web Scraping</span>
+                        </div>
+                        <p>Création d'un outil de web scraping :</p>
+                        <ul>
+                            <li>Exploration de pages web en suivant des liens pour collecter des données</li>
+                            <li>Gestion des exceptions HTTP et des restrictions de robots.txt</li>
+                        </ul>
+                        <div class="project-links">
+                            <a href="https://github.com/cherifon/Java-Web-Crawler" target="_blank">Voir le dépôt GitHub</a>
+                        </div>
+                    </div>
+                `
+            },
+            "Honeypot-SSH.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Honeypot sur un Serveur Local (SSH, Cowrie)</h2>
+                        <div class="tags">
+                            <span class="tag">Honeypot</span>
+                            <span class="tag">Sécurité</span>
+                            <span class="tag">SSH</span>
+                        </div>
+                        <p>Mise en place d’un honeypot pour observer les comportements des attaquants :</p>
+                        <ul>
+                            <li>Simulation d’un environnement SSH vulnérable sur une machine hébergée localement</li>
+                            <li>Surveillance des tentatives de connexion et des commandes exécutées</li>
+                            <li>Analyse des logs collectés</li>
+                        </ul>
+                        <div class="project-links">
+                            <a href="https://github.com/cherifon/Cowrie-SSH-Honeypot" target="_blank">Voir le dépôt GitHub</a>
+                        </div>
+                    </div>
+                `
+            },
+            "Gestionnaire-de-Tournoi.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Gestionnaire de Tournoi</h2>
+                        <div class="tags">
+                            <span class="tag">Java</span>
+                            <span class="tag">JavaFX</span>
+                            <span class="tag">SQL</span>
+                        </div>
+                        <p>Application en Java pour la gestion de tournois sportifs :</p>
+                        <ul>
+                            <li>Stockage des participants, scores et calendriers en base de données SQL</li>
+                            <li>Interface graphique intuitive avec JavaFX</li>
+                        </ul>
+                        <div class="project-links">
+                            <a href="https://github.com/cherifon/Gestionnaire_de_tournoi" target="_blank">Voir le dépôt GitHub</a>
+                        </div>
+                    </div>
+                `
+            },
+            "CO2-Forecasting.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Prévision de CO₂ et Microélectronique</h2>
+                        <div class="tags">
+                            <span class="tag">STM32</span>
+                            <span class="tag">Python</span>
+                            <span class="tag">C</span>
+                            <span class="tag">Data Science</span>
+                        </div>
+                        <p>Projet mêlant IoT, microélectronique et data science :</p>
+                        <ul>
+                            <li>Utilisation de STM32 et capteur SDC30 pour la collecte des données</li>
+                            <li>Analyse des données avec Python (pandas, matplotlib)</li>
+                            <li>Prédiction des concentrations de CO₂ avec modèles de régression</li>
+                        </ul>
+                        <div class="project-links">
+                            <a href="https://github.com/cherifon/CO2_Forecasting" target="_blank">Voir le dépôt GitHub</a>
+                        </div>
+                    </div>
+                `
+            }
         },
         "certifications": {
-            "Cisco_Introduction_to_Cybersecurity.txt": "Cette certification m’a permis d’acquérir une compréhension approfondie des principes fondamentaux de la cybersécurité, essentiels pour protége les systèmes informatiques contre les cybermenaces. Le programme couvrait des sujets tels que les différentes catégories de cyberattaques (phishing, ransomware, attaques DDoS, injections SQL, etc.), l’identification des vulnérabilités dans les systèmes, ainsi que les techniques de protection comme l’utilisation des pare-feu et  des logiciels antivirus.",
-            "Cisco_Networking_Basics.txt": "Avec cette certification, j’ai développé une maîtrise des principesfondamentaux des réseaux informatiques, couvrant la conception,l’administration, et la sécurisation des infrastructures réseau. J’ai appris àutiliser le modèle OSI pour comprendre les interactions entre les couchesréseau, ainsi qu’à configurer des réseaux locaux (LAN) et des réseauxétendus (WAN). Le programme incluait des protocoles clés commeTCP/IP, DHCP, et DNS, ainsi que des technologies de routage et decommutation. J’ai également acquis des compétences pratiques enadressage IP"
+            "Introduction-to-Cybersecurity-Cisco.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Introduction to Cybersecurity - Cisco</h2>
+                        <div class="tags">
+                            <span class="tag">Cybersécurité</span>
+                            <span class="tag">Cisco</span>
+                        </div>
+                        <img src="assets/Certif_intro_to_cyber.png" alt="Certification Cybersécurité Cisco" class="cert-image">
+                        <p>Compétences acquises :</p>
+                        <ul>
+                            <li>Analyse des cyberattaques courantes (phishing, ransomware, DDoS)</li>
+                            <li>Utilisation des pare-feu et des logiciels antivirus</li>
+                            <li>Concepts clés : Confidentialité, Intégrité, Disponibilité (CIA)</li>
+                        </ul>
+                    </div>
+                `
+            },
+            "Networking-Basics-Cisco.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Networking Basics - Cisco</h2>
+                        <div class="tags">
+                            <span class="tag">Réseaux</span>
+                            <span class="tag">Cisco</span>
+                        </div>
+                        <img src="assets/Certif_networking_basics.png" alt="Certification Réseaux Cisco" class="cert-image">
+                        <p>Principaux acquis :</p>
+                        <ul>
+                            <li>Configuration des réseaux locaux (LAN) et étendus (WAN)</li>
+                            <li>Utilisation des protocoles TCP/IP, DHCP, DNS</li>
+                            <li>Diagnostique réseau avec ping et traceroute</li>
+                        </ul>
+                    </div>
+                `
+            }
         },
         "experiences": {
-            "Stage-SOC.txt": "Stage au sein d'un Security Operations Center - Détection et réponse aux incidents de sécurité",
-            "Pentester.txt": "Tests d'intrusion et audits de sécurité pour diverses entreprises",
-            "Dev-Securite.txt": "Développement d'outils de sécurité et automatisation des tests"
+            "Coordinateur-IT-LAB.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Coordinateur au Club Informatique IT LAB Dauphine</h2>
+                        <div class="tags">
+                            <span class="tag">Encadrement</span>
+                            <span class="tag">Étudiants</span>
+                            <span class="tag">Hackathons</span>
+                        </div>
+                        <p>Encadrement d’une équipe d’étudiants :</p>
+                        <ul>
+                            <li>Formation sur GitHub et Godot Engine</li>
+                            <li>Coordination d’un projet de création de jeu vidéo</li>
+                            <li>Organisation de Hackathons et CTF</li>
+                        </ul>
+                    </div>
+                `
+            },
+            "Volontariat-HOP.txt": {
+                content: `
+                    <div class="project-card">
+                        <h2>Volontariat - Handisport Open Paris</h2>
+                        <div class="tags">
+                            <span class="tag">Handisport</span>
+                            <span class="tag">Sport</span>
+                            <span class="tag">Événement</span>
+                        </div>
+                        <p>Contributions au Handisport Open Paris :</p>
+                        <ul>
+                            <li>Assistance à la mise en place des installations sportives</li>
+                            <li>Support au processus de classification des athlètes</li>
+                        </ul>
+                    </div>
+                `
+            }
         },
-        "contact.txt": "Mes informations de contact"
+        "contact.txt": {
+            content: `
+                <div class="contact-card">
+                    <h2>Me contacter</h2>
+                    <div class="contact-links">
+                        <a href="mailto:cherifjebali0301@gmail.com" class="contact-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </a>
+                        <a href="https://www.linkedin.com/in/cherif-jebali-a248a1241/" target="_blank" class="contact-link">
+                            <i class="fab fa-linkedin"></i>
+                            <span>LinkedIn</span>
+                        </a>
+                        <a href="https://github.com/cherifon" target="_blank" class="contact-link">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </a>
+                    </div>
+                </div>
+            `
+        }
     },
+
     // Garder les sous-répertoires accessibles directement
     projets: {
-        "Cybersecurity-Tools.txt": {
+        "Pentesting-et-Bug-Bounty.txt": {
             content: `
                 <div class="project-card">
-                    <h2>Outils de Cybersécurité</h2>
-                    <img src="assets/projects/cyber-tools.png" alt="Outils Cybersécurité">
+                    <h2>Pentesting et Bug Bounty</h2>
                     <div class="tags">
-                        <span class="tag">Python</span>
                         <span class="tag">Pentest</span>
                         <span class="tag">Sécurité</span>
                     </div>
-                    <p>Suite d'outils développés pour les tests de pénétration:</p>
+                    <p>Participation active sur des plateformes comme Hack The Box (HTB) et Hack This Site :</p>
                     <ul>
-                        <li>Scanner de vulnérabilités</li>
-                        <li>Analyseur de trafic réseau</li>
-                        <li>Détecteur d'injections SQL</li>
+                        <li>Exploitation de vulnérabilités (SQL injection, path traversal, commande injection...)</li>
+                        <li>Utilisation d'outils comme Nmap et Burp Suite de la reconnaissance et l'analyse de systèmes</li>
+                        <li>Identification de faille sur des applications web et mise en œuvre de failles pour les exploiter</li>
                     </ul>
                     <div class="project-links">
-                        <a href="https://github.com/username/cyber-tools" target="_blank">GitHub</a>
-                        <a href="https://demo-link.com" target="_blank">Démo</a>
+                        <a href="https://app.hackthebox.com/profile/638392" target="_blank">Voir mon profil Hack The Box</a>
+                        <a href="https://github.com/cherifon/HackTheBox" target="_blank">Voir mes write-ups</a>
                     </div>
                 </div>
             `
         },
-        "HackTheBox-Writeups.txt" : "Une collection de write-ups détaillant la résolution des challenges et des machines virtuelles de Hack The Box.",
-        "Java-Web-Crawler.txt" : "Un crawler web développé en Java qui explore des pages web et extrait des données structurées.",
-        "Gestionnaire-de-Tournoi.txt" : "Un gestionnaire de tournoi développé en Java intégrant une base de données en SQL pour suivre les scores et les classements.",
-        "CO2-Forecasting.txt" : "Un projet de prédiction de la concentration de CO2 dans l'air en utilisant des méthodes de machine learning et des données collectées sur une période de plusieurs semaines."
+        "Scripts-Cybersecurite.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Scripts pour la Cybersécurité</h2>
+                    <div class="tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">Bash</span>
+                    </div>
+                    <p>Développement de scripts Python et Bash :</p>
+                    <ul>
+                        <li>Scanner de ports pour l'analyse de la surface d'attaque</li>
+                        <li>Simulation d'attaques DDoS ou de flooding utilisant Scapy</li>
+                        <li>Automatisation de scans et de tests sur des cibles définies</li>
+                        <li>Attaques de mots de passe sur SSH et Telnet</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="https://github.com/cherifon/Cybersecurity-Tools" target="_blank">Voir le dépôt GitHub</a>
+                    </div>
+                </div>
+            `
+        },
+        "Web-Crawler-Java.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Web Crawler en Java</h2>
+                    <div class="tags">
+                        <span class="tag">Java</span>
+                        <span class="tag">Web Scraping</span>
+                    </div>
+                    <p>Création d'un outil de web scraping :</p>
+                    <ul>
+                        <li>Exploration de pages web en suivant des liens pour collecter des données</li>
+                        <li>Gestion des exceptions HTTP et des restrictions de robots.txt</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="https://github.com/cherifon/Java-Web-Crawler" target="_blank">Voir le dépôt GitHub</a>
+                    </div>
+                </div>
+            `
+        },
+        "Honeypot-SSH.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Honeypot sur un Serveur Local (SSH, Cowrie)</h2>
+                    <div class="tags">
+                        <span class="tag">Honeypot</span>
+                        <span class="tag">Sécurité</span>
+                        <span class="tag">SSH</span>
+                    </div>
+                    <p>Mise en place d’un honeypot pour observer les comportements des attaquants :</p>
+                    <ul>
+                        <li>Simulation d’un environnement SSH vulnérable sur une machine hébergée localement</li>
+                        <li>Surveillance des tentatives de connexion et des commandes exécutées</li>
+                        <li>Analyse des logs collectés</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="https://github.com/cherifon/Cowrie-SSH-Honeypot" target="_blank">Voir le dépôt GitHub</a>
+                    </div>
+                </div>
+            `
+        },
+        "Gestionnaire-de-Tournoi.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Gestionnaire de Tournoi</h2>
+                    <div class="tags">
+                        <span class="tag">Java</span>
+                        <span class="tag">JavaFX</span>
+                        <span class="tag">SQL</span>
+                    </div>
+                    <p>Application en Java pour la gestion de tournois sportifs :</p>
+                    <ul>
+                        <li>Stockage des participants, scores et calendriers en base de données SQL</li>
+                        <li>Interface graphique intuitive avec JavaFX</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="https://github.com/cherifon/Gestionnaire_de_tournoi" target="_blank">Voir le dépôt GitHub</a>
+                    </div>
+                </div>
+            `
+        },
+        "CO2-Forecasting.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Prévision de CO₂ et Microélectronique</h2>
+                    <div class="tags">
+                        <span class="tag">STM32</span>
+                        <span class="tag">Python</span>
+                        <span class="tag">C</span>
+                        <span class="tag">Data Science</span>
+                    </div>
+                    <p>Projet mêlant IoT, microélectronique et data science :</p>
+                    <ul>
+                        <li>Utilisation de STM32 et capteur SDC30 pour la collecte des données</li>
+                        <li>Analyse des données avec Python (pandas, matplotlib)</li>
+                        <li>Prédiction des concentrations de CO₂ avec modèles de régression</li>
+                    </ul>
+                    <div class="project-links">
+                        <a href="https://github.com/cherifon/CO2_Forecasting" target="_blank">Voir le dépôt GitHub</a>
+                    </div>
+                </div>
+            `
+        } 
     },
     certifications: {
-        "Cisco_Introduction_to_Cybersecurity.txt": "Cette certification m’a permis d’acquérir une compréhension approfondie des principes fondamentaux de la cybersécurité, essentiels pour protége les systèmes informatiques contre les cybermenaces. Le programme couvrait des sujets tels que les différentes catégories de cyberattaques (phishing, ransomware, attaques DDoS, injections SQL, etc.), l’identification des vulnérabilités dans les systèmes, ainsi que les techniques de protection comme l’utilisation des pare-feu et  des logiciels antivirus.",
-        "Cisco_Networking_Basics.txt": "Avec cette certification, j’ai développé une maîtrise des principesfondamentaux des réseaux informatiques, couvrant la conception,l’administration, et la sécurisation des infrastructures réseau. J’ai appris àutiliser le modèle OSI pour comprendre les interactions entre les couchesréseau, ainsi qu’à configurer des réseaux locaux (LAN) et des réseauxétendus (WAN). Le programme incluait des protocoles clés commeTCP/IP, DHCP, et DNS, ainsi que des technologies de routage et decommutation. J’ai également acquis des compétences pratiques enadressage IP"
-    },
+        "Introduction-to-Cybersecurity-Cisco.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Introduction to Cybersecurity - Cisco</h2>
+                    <div class="tags">
+                        <span class="tag">Cybersécurité</span>
+                        <span class="tag">Cisco</span>
+                    </div>
+                    <img src="assets/Certif_intro_to_cyber.png" alt="Certification Cybersécurité Cisco" class="cert-image">
+                    <p>Compétences acquises :</p>
+                    <ul>
+                        <li>Analyse des cyberattaques courantes (phishing, ransomware, DDoS)</li>
+                        <li>Utilisation des pare-feu et des logiciels antivirus</li>
+                        <li>Concepts clés : Confidentialité, Intégrité, Disponibilité (CIA)</li>
+                    </ul>
+                </div>
+            `
+        },
+        "Networking-Basics-Cisco.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Networking Basics - Cisco</h2>
+                    <div class="tags">
+                        <span class="tag">Réseaux</span>
+                        <span class="tag">Cisco</span>
+                    </div>
+                    <img src="assets/Certif_networking_basics.png" alt="Certification Réseaux Cisco" class="cert-image">
+                    <p>Principaux acquis :</p>
+                    <ul>
+                        <li>Configuration des réseaux locaux (LAN) et étendus (WAN)</li>
+                        <li>Utilisation des protocoles TCP/IP, DHCP, DNS</li>
+                        <li>Diagnostique réseau avec ping et traceroute</li>
+                    </ul>
+                </div>
+            `
+        }
+        },
     experiences: {
-        "Stage-SOC.txt": "Stage au sein d'un Security Operations Center - Détection et réponse aux incidents de sécurité",
-        "Pentester.txt": "Tests d'intrusion et audits de sécurité pour diverses entreprises",
-        "Dev-Securite.txt": "Développement d'outils de sécurité et automatisation des tests"
+        "Coordinateur-IT-LAB.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Coordinateur au Club Informatique IT LAB Dauphine</h2>
+                    <div class="tags">
+                        <span class="tag">Encadrement</span>
+                        <span class="tag">Étudiants</span>
+                        <span class="tag">Hackathons</span>
+                    </div>
+                    <p>Encadrement d’une équipe d’étudiants :</p>
+                    <ul>
+                        <li>Formation sur GitHub et Godot Engine</li>
+                        <li>Coordination d’un projet de création de jeu vidéo</li>
+                        <li>Organisation de Hackathons et CTF</li>
+                    </ul>
+                </div>
+            `
+        },
+        "Volontariat-HOP.txt": {
+            content: `
+                <div class="project-card">
+                    <h2>Volontariat - Handisport Open Paris</h2>
+                    <div class="tags">
+                        <span class="tag">Handisport</span>
+                        <span class="tag">Sport</span>
+                        <span class="tag">Événement</span>
+                    </div>
+                    <p>Contributions au Handisport Open Paris :</p>
+                    <ul>
+                        <li>Assistance à la mise en place des installations sportives</li>
+                        <li>Support au processus de classification des athlètes</li>
+                    </ul>
+                </div>
+            `
+        }
     }
 };
 
@@ -178,7 +549,7 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
                 }
                 else {
                     // Suggérer les commandes de base qui commencent par la saisie
-                    const baseCommands = ["-h", "--help", "whoami", "ls", "cd", "cat"];
+                    const baseCommands = ["-h", "--help", "whoami", "ls", "cd", "cat", "home"];
                     suggestions = baseCommands.filter(cmd => cmd.startsWith(currentValue.toLowerCase()));
                 }
             }
@@ -266,6 +637,7 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
                 response.innerHTML = `
                     Commandes disponibles :
                     <ul>
+                        <li>home : Retourne à l'accueil</li>
                         <li>whoami : Affiche ma présentation</li>
                         <li>ls : Liste des fichiers et dossiers</li>
                         <li>cat [fichier] : Affiche le contenu d'un fichier</li>
@@ -319,6 +691,10 @@ document.getElementById("terminal-input").addEventListener("keydown", function(e
                 } else {
                     response.textContent = `Fichier "${file}" introuvable.`;
                 }
+                break;
+
+            case normalizeCommand(input) === "home":
+                response.innerHTML = initialContent;
                 break;
         
             default:
@@ -383,25 +759,15 @@ document.getElementById("terminal-input").addEventListener("input", function(eve
 
 // Ajouter cette fonction de formatage
 function formatLsOutput(items, currentDir) {
-    // Ajouter whoami si on est dans le répertoire root
-    const displayItems = [...items];
-    if (currentDir === 'root') {
-        displayItems.push('whoami');
-    }
-
     return `<div class="directory-list">
-        ${displayItems.map(item => {
+        ${items.map(item => {
             const itemData = fileSystem[currentDir][item];
             let className = '';
             
-            if (item === 'whoami') {
-                className = 'command';
-            } else if (typeof itemData === 'object' && !itemData.content) {
+            if (typeof itemData === 'object' && !itemData.content) {
                 className = 'directory';
                 item = item + '/'; // Ajoute un slash pour les dossiers
-            } else if (item === 'contact.txt') {
-                className = 'file';
-            } else if (typeof itemData === 'string' || (typeof itemData === 'object' && itemData.content)) {
+            } else {
                 className = 'file';
             }
             
