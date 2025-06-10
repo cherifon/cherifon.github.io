@@ -18,12 +18,14 @@ const initialContent = `
                 <span class="tag">Cybersécurité</span>
                 <span class="tag">Pentesting</span>
                 <span class="tag">IA</span>
+                <span class="tag">Administration Système</span>
             </div>
         </div>
 
         <div class="section description">
-            <p>Je m'appelle Cherif Jebali, étudiant en troisième année de mathématiques appliquées et informatique.</p>
+            <p>Je m'appelle Cherif Jebali, étudiant en Cyberdéfense à l'école Hexagone.</p>
             <p>Passionné par la cybersécurité, le pentesting et l'IA, je développe régulièrement des outils de sécurité pour tester et renforcer la résilience des systèmes.</p>
+            <p>Projet en cours : Création d'un homelab avec des services web sécurisés.</p>
         </div>
 
         <div class="command-hint">
