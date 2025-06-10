@@ -15,10 +15,26 @@ body {
     align-items: center;
 }
 
+.iframe-container {
+    display: flex;
+    align-items: center; 
+    margin: 0 auto; 
+    padding: 10px 0; 
+    width: 100%; 
+}
+
+.iframe-container iframe {
+    display: block;
+    width: 327px; 
+    height: 84px; 
+    margin: 0; 
+    padding: 0; 
+}
+
 .terminal-window {
     width: 80%;
     max-width: 950px;
-    max-height: 650px; /* Limite la hauteur du terminal */
+    max-height: 850px; /* Limite la hauteur du terminal */
     background-color: var(--terminal-bg);
     border: 2px solid var(--terminal-green);
     box-shadow: 0 0 15px var(--terminal-green);
@@ -61,6 +77,7 @@ body {
     font-weight: bold;
     border-bottom: 2px solid;
     text-align: left;
+    margin-bottom: 10px;
 }
 
 .prompt {
@@ -142,6 +159,16 @@ body {
     background: rgba(0, 255, 0, 0.2);
     box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
     transform: translateY(-2px);
+}
+
+.styled-link {
+    color: var(--terminal-green);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.styled-link:hover {
+    text-decoration: underline;
 }
 
 /* Lists */

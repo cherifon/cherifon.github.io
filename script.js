@@ -28,6 +28,12 @@ const initialContent = `
             <p>Projet en cours : Création d'un homelab avec des services web sécurisés.</p>
         </div>
 
+        <div class="iframe-container">
+                <iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=363282" 
+                        style="border:none;" 
+                        scrolling="no"></iframe>
+        </div>
+
         <div class="command-hint">
             <p>Ce terminal interactif a été conçu pour présenter mes compétences, mes projets et mes expériences dans un format original inspiré de l'environnement Kali Linux.</p>
             <p>Tapez <span class="cmd">whoami</span> pour en savoir plus sur moi, <span class="cmd">home</span> pour revenir vers le menu principal et <span class="cmd">-h</span> pour la liste des commandes.</p>
