@@ -1,127 +1,107 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Terminal</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script> <!-- defer permet de charger le script après le chargement de la page -->
+    <title>cherif@kali:~ — Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="terminal-window">
-        <div class="terminal-header">cherif@kali:~</div>
+<body data-theme="github" data-mode="terminal">
 
-        <!-- presentation -->
-        <div class="initial-content command-line">
-            <span class="prompt">cherif@kali:~$</span>
-            <span>echo "Bienvenue sur mon portfolio interactif !"</span>
+    <div class="scanlines"></div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="terminal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+            </div>
+            <span class="topbar-title">cherif@kali:~/portfolio</span>
         </div>
+        <div class="topbar-right">
+            <button class="hdr-btn" id="lang-btn">&#x1F1EB;&#x1F1F7; FR</button>
+            <button class="hdr-btn" id="theme-btn" title="Cycle theme">&#9680;</button>
+            <div class="mode-toggle" id="mode-toggle">
+                <span class="mode-opt" data-m="terminal"><i class="fas fa-terminal"></i> Terminal</span>
+                <span class="mode-opt" data-m="visual"><i class="fas fa-th-large"></i> Visual</span>
+                <div class="mode-slider"></div>
+            </div>
+        </div>
+    </header>
 
-        <div class="terminal-card initial-content">
-            <div class="header">
-                <span class="highlight">Cherif Jebali</span>
-                <div class="tags">
-                    <span class="tag">Cybersécurité</span>
-                    <span class="tag">Pentesting</span>
-                    <span class="tag">IA</span>
-                    <span class="tag">Administration Système</span>
+    <!-- TERMINAL MODE -->
+    <div id="terminal-view">
+        <div class="terminal-window">
+            <div class="terminal-body" id="terminal-body">
+                <div id="nmap-container" class="initial-content"></div>
+                <div id="welcome-container" class="initial-content"></div>
+                <div class="command-line initial-content">
+                    <span class="prompt">cherif@kali:~$</span>
+                    <span class="cmd-text">ls</span>
+                </div>
+                <div class="directory-list initial-content" id="init-ls"></div>
+                <div class="command-line" id="input-line">
+                    <span class="prompt">cherif@kali:~$</span>
+                    <div class="input-wrap">
+                        <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type a command...">
+                        <span class="blink-cursor">&#9608;</span>
+                    </div>
                 </div>
             </div>
-
-            <div class="section description">
-                <p>Je m'appelle Cherif Jebali, étudiant en Cyberdéfense à l'école Hexagone.</p>
-                <p>Passionné par la cybersécurité, le pentesting et l'IA, je développe régulièrement des outils de sécurité pour tester et renforcer la résilience des systèmes.</p>
-                <p>Projet en cours : Création d'un homelab avec des services web sécurisés.</p>
-            </div>
-
-            <div class="iframe-container">
-                <iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=363282" 
-                        style="border:none;" 
-                        scrolling="no"></iframe>
-            </div>
-
-            <div class="command-hint">
-                <p>Ce terminal interactif a été conçu pour présenter mes compétences, mes projets et mes expériences dans un format original inspiré de l'environnement Kali Linux.</p>
-                <p>Tapez <span class="cmd">whoami</span> pour en savoir plus sur moi, <span class="cmd">home</span> pour revenir vers le menu principal et <span class="cmd">-h</span> pour la liste des commandes.</p>
-            </div>
-
         </div>
-
-        <!-- ls initial -->
-        <div class="initial-content command-line">
-            <span class="prompt">cherif@kali:~$</span>
-            <span>ls</span>
-        </div>
-        <div class="directory-list initial-content">
-            <span class="directory">projets/</span>
-            <span class="directory">certifications/</span>
-            <span class="directory">experiences/</span>
-            <span class="file">contact.txt</span>
-        </div>
-
-        <!-- Ligne de commande interactive-->
-        <div class="command-line">
-            <span class="prompt">cherif@kali:~$</span>
-            <input id="terminal-input" type="text" autofocus autocomplete="off" placeholder="Tapez une commande">
+        <div class="mobile-bar">
+            <button class="mob-btn" data-cmd="whoami">whoami</button>
+            <button class="mob-btn" data-cmd="ls">ls</button>
+            <button class="mob-btn" data-cmd="cd projets">projets</button>
+            <button class="mob-btn" data-cmd="cd certifications">certs</button>
+            <button class="mob-btn" data-cmd="cd experiences">exp</button>
+            <button class="mob-btn" data-cmd="cat contact.txt">contact</button>
+            <button class="mob-btn" data-cmd="help">help</button>
         </div>
     </div>
 
-    <!-- Contenu des commandes -->
-
-    <!-- whoami -->
-    <div id="whoami-content" style="display: none;">
-        <div class="terminal-card">
-            <div class="header">
-                <span class="highlight">Cherif Jebali</span>
-                <div class="tags">
-                    <span class="tag">Cybersécurité</span>
-                    <span class="tag">Pentesting</span>
-                    <span class="tag">IA</span>
+    <!-- VISUAL MODE -->
+    <div id="visual-view" style="display:none">
+        <section class="v-hero">
+            <div class="v-hero-inner">
+                <div class="v-avatar">CJ</div>
+                <div class="v-hero-text">
+                    <h1 id="v-name">Cherif Jebali</h1>
+                    <p class="v-subtitle" id="v-subtitle">M1 Cyberdefense &middot; Ecole Hexagone Versailles</p>
+                    <div class="v-tags" id="v-tags"></div>
+                    <div class="v-links">
+                        <a href="mailto:cherif.jebali@proton.me" class="v-link"><i class="fas fa-envelope"></i></a>
+                        <a href="https://github.com/cherifon" target="_blank" class="v-link"><i class="fab fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/cherif-jebali-a248a1241/" target="_blank" class="v-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://www.credly.com/users/cherif-jebali/badges" target="_blank" class="v-link"><i class="fas fa-medal"></i></a>
+                        <a href="assets/CV_Cherif_Jebali_EN.pdf" download class="v-link v-link-dl"><i class="fas fa-file-download"></i> CV &#x1F1EC;&#x1F1E7;</a>
+                        <a href="assets/CV_Cherif_Jebali_FR.pdf" download class="v-link v-link-dl"><i class="fas fa-file-download"></i> CV &#x1F1EB;&#x1F1F7;</a>
+                    </div>
                 </div>
             </div>
-
-            <div class="section description">
-                <h3>$ whoami</h3>
-                <p>Étudiant passionné en Master Cyberdéfense à l'école Hexagone.</p>
-                <p>Spécialisé en cybersécurité et pentesting, je développe activement des outils pour tester et renforcer la sécurité des systèmes.</p>
-                <p>Mon objectif est de contribuer à la protection des infrastructures numériques en combinant expertise technique et approche analytique.</p>
-            </div>
-
-            <div class="section">
-                <h3>$ Formation</h3>
-                <p>└── Licence en mathématiques appliquées et informatique à Paris-Dauphine</p>
-                <p>└── Master en Cyberdéfense à l'école Hexagone</p>
-            </div>
-
-            <div class="section">
-                <h3>$ Intérêts</h3>
-                <p>├── Cybersécurité</p>
-                <p>├── Pentesting</p>
-                <p>├── Analyse de données</p>
-                <p>└── Intelligence Artificielle</p>
-                <p>└── Administration Système et Réseau</p>
-            </div>
-
-            <div class="section">
-                <h3>$ Compétences Techniques</h3>
-                <p>├── Languages: Python, C, Java, R, SQL, JavaScript</p>
-                <p>├── Systèmes: Linux (Kali, Ubuntu), Windows</p>
-                <p>├── Outils: Kali Linux, Nmap, Wireshark, Metasploit, Burp Suite</p>
-                <p>└── Technologies: Docker, Git</p>
-                <p>└── Plateformes: GitHub, Hack The Box, Hack This Site, TryHackMe</p>
-            </div>
-
-            <div class="section">
-                <h3>$ Projets en cours</h3>
-                <p>└── Création d'un homelab hébergant des services web tels que Nextcloud et Pi-Hole, utilisant Docker et sécurisé par un reverse proxy Nginx et Fail2Ban.</p>
-            </div>
-
-            <div class="command-hint">
-                Tapez <span class="cmd">ls</span> pour voir mes projets, certifications et expériences.
-                ou <span class="cmd">-h</span> pour la liste des commandes.
-            </div>
-        </div>
+        </section>
+        <nav class="v-nav">
+            <button class="v-tab active" data-section="about"    id="tab-about">About</button>
+            <button class="v-tab"        data-section="projects" id="tab-projects">Projects</button>
+            <button class="v-tab"        data-section="certs"    id="tab-certs">Certifications</button>
+            <button class="v-tab"        data-section="exp"      id="tab-exp">Experience</button>
+            <button class="v-tab"        data-section="contact"  id="tab-contact">Contact</button>
+        </nav>
+        <main class="v-main">
+            <section class="v-section active" id="v-about"></section>
+            <section class="v-section"        id="v-projects"></section>
+            <section class="v-section"        id="v-certs"></section>
+            <section class="v-section"        id="v-exp"></section>
+            <section class="v-section"        id="v-contact"></section>
+        </main>
     </div>
+
+    <script src="script.js" defer></script>
 </body>
 </html>
