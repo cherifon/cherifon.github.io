@@ -1,0 +1,12 @@
+/* TEAM */
+Developer: Cherif Jebali
+Site: https://cherifjebali.com
+GitHub: @cherifon
+LinkedIn: cherif-jebali-a248a1241
+Location: Paris, France
+
+/* SITE */
+Last update: 2026/05/26
+Standards: HTML5, CSS3, JavaScript
+Hosting: Cloudflare Pages
+Source: GitHub (cherifon/cherifon.github.io)
