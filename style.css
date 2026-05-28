@@ -170,11 +170,15 @@ body{background:var(--bg);font-family:'JetBrains Mono','Fira Code','Courier New'
     .mobile-bar{display:flex}
     .v-about-grid{grid-template-columns:1fr}
     .topbar{padding:8px 12px}
+    .topbar-title{display:none}
+    .terminal-dots{display:none}
     .mode-opt{padding:4px 8px;font-size:.7rem}
     .v-hero-inner{gap:20px}
     .v-hero-text h1{font-size:1.5rem}
     .v-tl-item::before{left:-19px}
     .guide-grid{grid-template-columns:1fr 1fr}
+    .v-tab{padding:10px 10px;font-size:.78rem}
+    .v-nav{overflow-x:auto}
 }
 @media(max-width:400px){.guide-grid{grid-template-columns:1fr}}
 
