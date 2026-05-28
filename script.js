@@ -554,6 +554,8 @@ function processCommand(raw) {
     scrollDown(); return;
   } else if (cmd==='visual') {
     setMode('visual');
+  runBootNmap();
+  document.getElementById('boot-btn').addEventListener('click', closeBootModal);
   } else if (cmd==='sudo'||cmd.startsWith('sudo ')) {
     const l=t().easter.sudo; respond(`<div class="easter-card">${l.map(x=>`<p>${x}</p>`).join('')}</div>`);
   } else if (cmd==='hack'||cmd==='exploit') {
@@ -715,11 +717,45 @@ function showSugs(matches) {
 }
 
 // ── Init ───────────────────────────────────────────────────────────
+
+function runBootNmap() {
+  const s = t();
+  const container = document.getElementById('boot-nmap-container');
+  if (!container) return;
+  const block = document.createElement('div');
+  block.className = 'nmap-block';
+  block.innerHTML = '<div class="nmap-cmd">$ ' + s.nmapCmd + '</div>';
+  container.appendChild(block);
+  const totalLines = s.nmapLines.length;
+  s.nmapLines.forEach((line, i) => {
+    setTimeout(() => {
+      const row = document.createElement('div');
+      row.className = 'nmap-line';
+      if (line.startsWith('<port>')) {
+        const p = line.replace('<port>','').split(/\s+/);
+        row.innerHTML = '<span class="port-open">'+p[0].padEnd(10)+'</span><span style="color:var(--green)">'+p[1].padEnd(7)+'</span><span class="port-info">'+p.slice(2).join(' ')+'</span>';
+      } else if (line.startsWith('<done>')) {
+        row.className += ' nmap-done';
+        row.textContent = line.replace('<done>','');
+      } else { row.textContent = line; }
+      block.appendChild(row);
+      if (i === totalLines - 1)
+        setTimeout(() => { document.getElementById('boot-enter').style.display = 'block'; }, 300);
+    }, i * 150);
+  });
+}
+function closeBootModal() {
+  const modal = document.getElementById('boot-modal');
+  if (!modal) return;
+  modal.style.opacity = '0';
+  setTimeout(() => modal.remove(), 500);
+}
 window.addEventListener('DOMContentLoaded', () => {
   setMode('visual');
+  runBootNmap();
+  document.getElementById('boot-btn').addEventListener('click', closeBootModal);
   buildWelcome();
   initVisualTabs();
-  setTimeout(runNmap, 400);
   setTimeout(updateModeSlider, 100);
 
   $('lang-btn').addEventListener('click', () => setLang(currentLang==='en'?'fr':'en'));
