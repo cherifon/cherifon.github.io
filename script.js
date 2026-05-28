@@ -12,7 +12,7 @@ let suggestionIndex  = 0;
 let originalPartial  = "";
 let currentLang      = "en";
 let currentTheme     = "github";
-let currentMode      = "terminal";
+let currentMode      = "visual";
 const themes         = ["github","hacker","retro","matrix"];
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -716,6 +716,7 @@ function showSugs(matches) {
 
 // ── Init ───────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  setMode('visual');
   buildWelcome();
   initVisualTabs();
   setTimeout(runNmap, 400);
