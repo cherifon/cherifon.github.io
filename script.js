@@ -554,6 +554,8 @@ function processCommand(raw) {
     scrollDown(); return;
   } else if (cmd==='visual') {
     setMode('visual');
+  runBootNmap();
+  document.getElementById('boot-btn').addEventListener('click', closeBootModal);
   } else if (cmd==='sudo'||cmd.startsWith('sudo ')) {
     const l=t().easter.sudo; respond(`<div class="easter-card">${l.map(x=>`<p>${x}</p>`).join('')}</div>`);
   } else if (cmd==='hack'||cmd==='exploit') {
@@ -752,7 +754,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setMode('visual');
   runBootNmap();
   document.getElementById('boot-btn').addEventListener('click', closeBootModal);
-  setTimeout(closeBootModal, 3000);
   buildWelcome();
   initVisualTabs();
   setTimeout(updateModeSlider, 100);
