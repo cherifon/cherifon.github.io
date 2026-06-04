@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ultimate DNS Shield — Cherif Jebali</title>
+  <meta name="description" content="How I built a self-hosted, private, ad-free DNS server on a Raspberry Pi 4 using Pi-hole, Unbound, and Docker." />
+  <meta property="og:title" content="Ultimate DNS Shield — Cherif Jebali" />
+  <meta property="og:description" content="Self-hosted recursive DNS with Pi-hole + Unbound + Docker on Raspberry Pi 4." />
+  <meta property="og:url" content="https://cherifjebali.com/articles/ultimate-dns-shield" />
+  <meta property="og:type" content="article" />
+  <link rel="canonical" href="https://cherifjebali.com/articles/ultimate-dns-shield" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'" />
+
+  <style>
+    /* ── Design tokens (mirrors main portfolio) ── */
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --text: #c9d1d9; --text2: #8b949e; --text3: #6e7681;
+      --accent: #58a6ff; --accent2: #3fb950; --accent3: #f78166;
+      --border: #30363d; --glow: rgba(88,166,255,.15);
+      --radius: 6px; --font: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    }
+    [data-theme="hacker"] {
+      --bg:#000; --bg2:#0a0a0a; --bg3:#111;
+      --text:#00ff41; --text2:#00cc33; --text3:#008822;
+      --accent:#00ff41; --accent2:#00cc33; --accent3:#ff0040;
+      --border:#00ff4133; --glow:rgba(0,255,65,.12);
+    }
+    [data-theme="retro"] {
+      --bg:#1a0a00; --bg2:#2a1500; --bg3:#3a2000;
+      --text:#ffb347; --text2:#cc8833; --text3:#886622;
+      --accent:#ff6a00; --accent2:#ffb347; --accent3:#ff3300;
+      --border:#ff6a0044; --glow:rgba(255,106,0,.12);
+    }
+    [data-theme="matrix"] {
+      --bg:#000; --bg2:#001100; --bg3:#002200;
+      --text:#00ff00; --text2:#00cc00; --text3:#009900;
+      --accent:#00ff00; --accent2:#00ffaa; --accent3:#ff0000;
+      --border:#00ff0033; --glow:rgba(0,255,0,.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; height: 42px;
+    }
+    .topbar-left { display: flex; align-items: center; gap: .75rem; }
+    .win-btns { display: flex; gap: .4rem; }
+    .win-btn {
+      width: 12px; height: 12px; border-radius: 50%; cursor: pointer;
+    }
+    .win-btn.close  { background: #ff5f57; }
+    .win-btn.min    { background: #febc2e; }
+    .win-btn.max    { background: #28c840; }
+    .topbar-path {
+      font-size: .72rem; color: var(--text2);
+    }
+    .topbar-path .prompt { color: var(--accent2); }
+    .topbar-path .sep    { color: var(--text3); }
+    .topbar-right { display: flex; gap: .5rem; }
+    .tb-btn {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2); font-family: var(--font); font-size: .72rem;
+      padding: .25rem .6rem; border-radius: var(--radius);
+      cursor: pointer; transition: all .2s;
+    }
+    .tb-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Main layout ── */
+    .container {
+      max-width: 780px; margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb {
+      font-size: .72rem; color: var(--text3);
+      margin-bottom: 2rem;
+    }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb .sep { margin: 0 .4rem; }
+
+    /* ── Article header ── */
+    .article-header { margin-bottom: 2.5rem; }
+    .article-tag {
+      display: inline-block;
+      background: var(--bg3); border: 1px solid var(--accent);
+      color: var(--accent); font-size: .68rem; padding: .15rem .5rem;
+      border-radius: var(--radius); margin-bottom: .75rem;
+    }
+    .article-title {
+      font-size: 1.6rem; font-weight: 700;
+      color: var(--text); line-height: 1.3;
+      margin-bottom: .75rem;
+    }
+    .article-meta {
+      font-size: .72rem; color: var(--text3);
+      display: flex; flex-wrap: wrap; gap: 1rem;
+    }
+    .article-meta span { display: flex; align-items: center; gap: .35rem; }
+    .article-meta i { color: var(--accent2); }
+
+    /* ── Divider ── */
+    hr.divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius); padding: 1rem 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .toc-title {
+      font-size: .72rem; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: .6rem;
+    }
+    .toc ol { padding-left: 1.25rem; }
+    .toc li { margin: .25rem 0; }
+    .toc a {
+      color: var(--text2); text-decoration: none; font-size: .82rem;
+      transition: color .2s;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 2.5rem; }
+
+    h2.section-title {
+      font-size: 1rem; font-weight: 600;
+      color: var(--accent); margin-bottom: 1rem;
+      padding-bottom: .4rem; border-bottom: 1px solid var(--border);
+    }
+    h2.section-title::before { content: "## "; color: var(--text3); }
+
+    h3.sub-title {
+      font-size: .88rem; font-weight: 600;
+      color: var(--accent2); margin: 1.25rem 0 .6rem;
+    }
+    h3.sub-title::before { content: "### "; color: var(--text3); }
+
+    p { margin-bottom: .9rem; }
+
+    a { color: var(--accent); }
+
+    /* ── Code blocks ── */
+    .code-block {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      margin: 1rem 0;
+    }
+    .code-header {
+      background: var(--bg3); border-bottom: 1px solid var(--border);
+      padding: .35rem .75rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .code-lang {
+      font-size: .68rem; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .copy-btn {
+      background: none; border: none; color: var(--text3);
+      font-family: var(--font); font-size: .68rem;
+      cursor: pointer; transition: color .2s; padding: 0;
+    }
+    .copy-btn:hover { color: var(--accent2); }
+    pre {
+      padding: 1rem 1.25rem;
+      overflow-x: auto; font-size: .82rem;
+      line-height: 1.6; tab-size: 2;
+    }
+    code { color: var(--text); }
+    .c-green  { color: #3fb950; }
+    .c-blue   { color: #58a6ff; }
+    .c-orange { color: #ff6a00; }
+    .c-red    { color: #f78166; }
+    .c-gray   { color: #8b949e; }
+    .c-yellow { color: #e3b341; }
+
+    /* inline code */
+    p code, li code {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 3px; padding: .1em .35em;
+      font-size: .85em; color: var(--accent2);
+    }
+
+    /* ── Architecture diagram ── */
+    .arch-diagram {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem 1.5rem;
+      font-size: .82rem; line-height: 2;
+      margin: 1rem 0;
+    }
+    .arch-diagram .node { color: var(--accent); font-weight: 600; }
+    .arch-diagram .arrow { color: var(--text3); }
+    .arch-diagram .desc  { color: var(--text2); font-size: .75rem; }
+
+    /* ── Info / warning boxes ── */
+    .callout {
+      border-radius: var(--radius);
+      padding: .85rem 1.1rem; margin: 1rem 0;
+      font-size: .84rem;
+      border-left: 3px solid;
+    }
+    .callout.info    { background: rgba(88,166,255,.07); border-color: var(--accent); }
+    .callout.success { background: rgba(63,185,80,.07);  border-color: var(--accent2); }
+    .callout.warn    { background: rgba(227,179,65,.07); border-color: #e3b341; color: #e3b341; }
+    .callout i { margin-right: .4rem; }
+
+    /* ── Lists ── */
+    ul, ol { padding-left: 1.4rem; margin-bottom: .9rem; }
+    li { margin: .3rem 0; }
+
+    /* ── Tags ── */
+    .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+    .tag {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2); font-size: .68rem;
+      padding: .15rem .5rem; border-radius: var(--radius);
+    }
+
+    /* ── Footer ── */
+    .article-footer {
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .back-link {
+      color: var(--accent); text-decoration: none; font-size: .82rem;
+      display: flex; align-items: center; gap: .4rem;
+      transition: gap .2s;
+    }
+    .back-link:hover { gap: .6rem; }
+    .repo-link {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2); text-decoration: none; font-size: .78rem;
+      padding: .4rem .85rem; border-radius: var(--radius);
+      display: flex; align-items: center; gap: .4rem;
+      transition: all .2s;
+    }
+    .repo-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Lang hidden ── */
+    [data-lang] { display: none; }
+    .lang-en [data-lang="en"],
+    .lang-fr [data-lang="fr"] { display: block; }
+    /* inline spans */
+    span[data-lang] { display: none; }
+    .lang-en span[data-lang="en"],
+    .lang-fr span[data-lang="fr"] { display: inline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .article-title { font-size: 1.2rem; }
+      .topbar-path   { display: none; }
+      pre            { font-size: .75rem; }
+    }
+  </style>
+</head>
+
+<body data-theme="github" class="lang-en">
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="win-btns">
+      <span class="win-btn close"></span>
+      <span class="win-btn min"></span>
+      <span class="win-btn max"></span>
+    </div>
+    <div class="topbar-path">
+      <span class="prompt">cherif@kali</span><span class="sep">:</span><span class="c-blue">~/articles/ultimate-dns-shield</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="tb-btn" id="lang-btn" onclick="toggleLang()">FR</button>
+    <button class="tb-btn" onclick="cycleTheme()">theme</button>
+    <a class="tb-btn" href="https://cherifjebali.com" style="text-decoration:none">~/portfolio</a>
+  </div>
+</header>
+
+<!-- ── Article ── -->
+<main class="container">
+
+  <nav class="breadcrumb">
+    <a href="https://cherifjebali.com">cherifjebali.com</a>
+    <span class="sep">/</span>articles
+    <span class="sep">/</span>ultimate-dns-shield
+  </nav>
+
+  <header class="article-header">
+    <span class="article-tag">homelab · privacy · networking</span>
+    <h1 class="article-title">
+      <span data-lang="en">Ultimate DNS Shield — Self-hosted recursive DNS with Pi-hole + Unbound + Docker</span>
+      <span data-lang="fr">Ultimate DNS Shield — DNS récursif auto-hébergé avec Pi-hole + Unbound + Docker</span>
+    </h1>
+    <div class="article-meta">
+      <span><i class="fas fa-calendar-alt"></i> 2026-06-04</span>
+      <span><i class="fas fa-clock"></i> <span data-lang="en">8 min read</span><span data-lang="fr">8 min de lecture</span></span>
+      <span><i class="fas fa-tag"></i> DNS · Raspberry Pi · Docker · Privacy</span>
+    </div>
+  </header>
+
+  <hr class="divider" />
+
+  <!-- TOC -->
+  <nav class="toc">
+    <div class="toc-title">
+      <span data-lang="en">Table of contents</span>
+      <span data-lang="fr">Sommaire</span>
+    </div>
+    <ol>
+      <li><a href="#why"><span data-lang="en">Why self-host your DNS?</span><span data-lang="fr">Pourquoi auto-héberger son DNS ?</span></a></li>
+      <li><a href="#architecture"><span data-lang="en">Architecture</span><span data-lang="fr">Architecture</span></a></li>
+      <li><a href="#prereqs"><span data-lang="en">Prerequisites</span><span data-lang="fr">Prérequis</span></a></li>
+      <li><a href="#install"><span data-lang="en">Installation</span><span data-lang="fr">Installation</span></a></li>
+      <li><a href="#security"><span data-lang="en">Security hardening</span><span data-lang="fr">Durcissement sécurité</span></a></li>
+      <li><a href="#verify"><span data-lang="en">Verification</span><span data-lang="fr">Vérification</span></a></li>
+      <li><a href="#results"><span data-lang="en">Results</span><span data-lang="fr">Résultats</span></a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. Why -->
+  <section class="section" id="why">
+    <h2 class="section-title">
+      <span data-lang="en">Why self-host your DNS?</span>
+      <span data-lang="fr">Pourquoi auto-héberger son DNS ?</span>
+    </h2>
+
+    <div data-lang="en">
+      <p>Every domain you resolve goes through a DNS resolver. By default, that's Google (<code>8.8.8.8</code>), Cloudflare (<code>1.1.1.1</code>), or your ISP — all of which log your queries to varying degrees. Your browsing history is essentially visible to them.</p>
+      <p>The goal of <strong>Ultimate DNS Shield</strong> is to break that dependency entirely: no third-party resolver ever sees your queries. Unbound resolves domains by querying the root nameservers directly, and Pi-hole drops ad and tracker domains before they even reach the network stack.</p>
+      <div class="callout info">
+        <i class="fas fa-info-circle"></i>
+        This is not about hiding from law enforcement — it's about reducing unnecessary data exposure to commercial entities and your ISP.
+      </div>
+    </div>
+
+    <div data-lang="fr">
+      <p>Chaque domaine que tu résous passe par un résolveur DNS. Par défaut, c'est Google (<code>8.8.8.8</code>), Cloudflare (<code>1.1.1.1</code>), ou ton FAI — qui journalisent tous tes requêtes à des degrés variables. Ton historique de navigation leur est en pratique visible.</p>
+      <p>L'objectif d'<strong>Ultimate DNS Shield</strong> est de briser cette dépendance : aucun résolveur tiers ne voit tes requêtes. Unbound résout les domaines en interrogeant directement les serveurs racine, et Pi-hole bloque les domaines publicitaires et trackers avant même qu'ils n'atteignent la pile réseau.</p>
+      <div class="callout info">
+        <i class="fas fa-info-circle"></i>
+        L'objectif n'est pas de se cacher des autorités — c'est de réduire l'exposition inutile de données à des entités commerciales et à ton FAI.
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Architecture -->
+  <section class="section" id="architecture">
+    <h2 class="section-title">Architecture</h2>
+
+    <div data-lang="en">
+      <p>The stack runs three layers, each containerised on an isolated Docker bridge network (<code>dns-net</code>). Unbound is never exposed to the LAN — only Pi-hole can reach it.</p>
+    </div>
+    <div data-lang="fr">
+      <p>La stack tourne sur trois couches, chacune conteneurisée sur un réseau bridge Docker isolé (<code>dns-net</code>). Unbound n'est jamais exposé au LAN — seul Pi-hole peut l'atteindre.</p>
+    </div>
+
+    <div class="arch-diagram">
+      <div><span class="c-gray">LAN devices</span> <span class="arrow">──►</span> <span class="node">Pi-hole</span> <span class="c-gray">:53 (172.20.0.3)</span></div>
+      <div><span style="margin-left:3.2rem"></span><span class="arrow">│</span></div>
+      <div><span style="margin-left:3.2rem"></span><span class="arrow">└──►</span> <span class="node">Unbound</span> <span class="c-gray">:5335 (172.20.0.2) — internal only</span></div>
+      <div><span style="margin-left:7.5rem"></span><span class="arrow">│</span></div>
+      <div><span style="margin-left:7.5rem"></span><span class="arrow">└──►</span> <span class="c-yellow">Root nameservers</span> <span class="c-gray">(a-m.root-servers.net)</span></div>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">IP assignments</span>
+      <span data-lang="fr">Assignation des IPs</span>
+    </h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">docker-compose.yml (extract)</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="c-gray"># Internal bridge — 172.20.0.0/24</span>
+networks:
+  dns-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: <span class="c-blue">172.20.0.0/24</span>
+
+services:
+  unbound:
+    image: mvance/unbound:latest
+    networks:
+      dns-net:
+        ipv4_address: <span class="c-green">172.20.0.2</span>   <span class="c-gray"># never exposed to LAN</span>
+
+  pihole:
+    image: pihole/pihole:latest
+    networks:
+      dns-net:
+        ipv4_address: <span class="c-green">172.20.0.3</span>
+    ports:
+      - <span class="c-yellow">"53:53/tcp"</span>
+      - <span class="c-yellow">"53:53/udp"</span>
+      - <span class="c-yellow">"80:80/tcp"</span>   <span class="c-gray"># Web UI</span></code></pre>
+    </div>
+
+    <div data-lang="en">
+      <p>Pi-hole is configured with <code>PIHOLE_DNS_=172.20.0.2#5335</code> so it forwards unblocked queries to Unbound, not to any public resolver.</p>
+    </div>
+    <div data-lang="fr">
+      <p>Pi-hole est configuré avec <code>PIHOLE_DNS_=172.20.0.2#5335</code> pour transmettre les requêtes non bloquées à Unbound, et non à un résolveur public.</p>
+    </div>
+  </section>
+
+  <!-- 3. Prerequisites -->
+  <section class="section" id="prereqs">
+    <h2 class="section-title">
+      <span data-lang="en">Prerequisites</span>
+      <span data-lang="fr">Prérequis</span>
+    </h2>
+
+    <div data-lang="en">
+      <ul>
+        <li>Raspberry Pi 4 (2 GB RAM minimum)</li>
+        <li>Raspberry Pi OS Lite 64-bit (fresh install)</li>
+        <li>Static LAN IP assigned to the Pi (via DHCP reservation or <code>/etc/dhcpcd.conf</code>)</li>
+        <li>Docker + Docker Compose installed</li>
+        <li>Port 53 free on the host (disable <code>systemd-resolved</code> if needed)</li>
+      </ul>
+      <div class="callout warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        On Ubuntu/Pi OS, <code>systemd-resolved</code> occupies port 53 by default. Disable it before deploying: <code>sudo systemctl disable --now systemd-resolved</code>
+      </div>
+    </div>
+
+    <div data-lang="fr">
+      <ul>
+        <li>Raspberry Pi 4 (2 Go RAM minimum)</li>
+        <li>Raspberry Pi OS Lite 64-bit (installation fraîche)</li>
+        <li>IP LAN statique assignée au Pi (réservation DHCP ou <code>/etc/dhcpcd.conf</code>)</li>
+        <li>Docker + Docker Compose installés</li>
+        <li>Port 53 libre sur l'hôte (désactiver <code>systemd-resolved</code> si nécessaire)</li>
+      </ul>
+      <div class="callout warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        Sur Ubuntu/Pi OS, <code>systemd-resolved</code> occupe le port 53 par défaut. Le désactiver avant le déploiement : <code>sudo systemctl disable --now systemd-resolved</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Installation -->
+  <section class="section" id="install">
+    <h2 class="section-title">Installation</h2>
+
+    <h3 class="sub-title">
+      <span data-lang="en">1 — Clone and configure</span>
+      <span data-lang="fr">1 — Cloner et configurer</span>
+    </h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="c-green">$</span> git clone https://github.com/cherifon/Ultimate-DNS-Shield.git
+<span class="c-green">$</span> cd Ultimate-DNS-Shield</code></pre>
+    </div>
+
+    <div data-lang="en">
+      <p>Edit <code>config/docker-compose.yml</code> — three values to adjust:</p>
+    </div>
+    <div data-lang="fr">
+      <p>Éditer <code>config/docker-compose.yml</code> — trois valeurs à ajuster :</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">docker-compose.yml</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code>environment:
+  TZ: <span class="c-yellow">Europe/Paris</span>          <span class="c-gray"># your timezone</span>
+  WEBPASSWORD: <span class="c-yellow">your_password</span>  <span class="c-gray"># Pi-hole web UI password</span>
+volumes:
+  - <span class="c-yellow">/home/pi/pihole</span>:/etc/pihole    <span class="c-gray"># persistent config path</span>
+  - <span class="c-yellow">/home/pi/dnsmasq</span>:/etc/dnsmasq.d</code></pre>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">2 — Run the installer</span>
+      <span data-lang="fr">2 — Lancer l'installeur</span>
+    </h3>
+    <div data-lang="en">
+      <p>A dry-run mode is available to preview changes without applying them:</p>
+    </div>
+    <div data-lang="fr">
+      <p>Un mode dry-run est disponible pour prévisualiser les changements sans les appliquer :</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="c-gray"># Preview (no changes applied)</span>
+<span class="c-green">$</span> sudo bash scripts/install.sh <span class="c-blue">--dry-run</span>
+
+<span class="c-gray"># Full install</span>
+<span class="c-green">$</span> sudo bash scripts/install.sh</code></pre>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">3 — Router configuration</span>
+      <span data-lang="fr">3 — Configuration du routeur</span>
+    </h3>
+
+    <div data-lang="en">
+      <p>Once the containers are up, point your router's DHCP DNS to your Pi's LAN IP. Every device on the network will automatically use Pi-hole without any per-device configuration.</p>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        Alternatively, set the DNS per-device or per-VLAN if you want selective coverage.
+      </div>
+    </div>
+    <div data-lang="fr">
+      <p>Une fois les conteneurs lancés, pointer le DNS DHCP du routeur vers l'IP LAN du Pi. Chaque appareil du réseau utilisera automatiquement Pi-hole sans configuration individuelle.</p>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        Alternative : configurer le DNS par appareil ou par VLAN pour une couverture sélective.
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Security -->
+  <section class="section" id="security">
+    <h2 class="section-title">
+      <span data-lang="en">Security hardening</span>
+      <span data-lang="fr">Durcissement sécurité</span>
+    </h2>
+
+    <div data-lang="en">
+      <p>The <code>scripts/security.sh</code> script configures UFW and Fail2Ban automatically. Here's what it applies:</p>
+    </div>
+    <div data-lang="fr">
+      <p>Le script <code>scripts/security.sh</code> configure UFW et Fail2Ban automatiquement. Voici ce qu'il applique :</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="c-green">$</span> sudo bash scripts/security.sh</code></pre>
+    </div>
+
+    <div data-lang="en">
+      <ul>
+        <li><strong>UFW rules</strong> — allow port 53 (DNS) and 80 (Pi-hole UI) from LAN only; deny everything else</li>
+        <li><strong>Fail2Ban</strong> — rate-limits DNS query floods and brute-force attempts on the web UI</li>
+        <li><strong>DNSSEC validation</strong> — enforced in Unbound (<code>val-permissive-mode: no</code>); queries with invalid signatures are rejected</li>
+        <li><strong>Unbound isolation</strong> — bound to <code>172.20.0.2</code> only, never reachable from outside Docker's internal bridge</li>
+      </ul>
+    </div>
+    <div data-lang="fr">
+      <ul>
+        <li><strong>Règles UFW</strong> — autorise le port 53 (DNS) et 80 (UI Pi-hole) depuis le LAN uniquement ; tout le reste est bloqué</li>
+        <li><strong>Fail2Ban</strong> — limite les floods de requêtes DNS et les tentatives de brute-force sur l'interface web</li>
+        <li><strong>Validation DNSSEC</strong> — appliquée dans Unbound (<code>val-permissive-mode: no</code>) ; les requêtes avec des signatures invalides sont rejetées</li>
+        <li><strong>Isolation Unbound</strong> — lié à <code>172.20.0.2</code> uniquement, jamais accessible depuis l'extérieur du bridge interne Docker</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. Verification -->
+  <section class="section" id="verify">
+    <h2 class="section-title">
+      <span data-lang="en">Verification</span>
+      <span data-lang="fr">Vérification</span>
+    </h2>
+
+    <div data-lang="en">
+      <p>Three checks to confirm the stack is working correctly:</p>
+    </div>
+    <div data-lang="fr">
+      <p>Trois vérifications pour confirmer que la stack fonctionne correctement :</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash — normal resolution</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="c-green">$</span> dig github.com @&lt;PI_IP&gt;
+<span class="c-gray">;; Query time: 8 msec</span>
+<span class="c-gray">;; SERVER: 192.168.1.X#53</span>  <span class="c-green">✓ answered by your Pi</span></code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash — ad blocking</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="c-green">$</span> dig doubleclick.net @&lt;PI_IP&gt;
+<span class="c-gray">;; ANSWER SECTION:</span>
+doubleclick.net.  <span class="c-blue">0</span> IN A <span class="c-red">0.0.0.0</span>  <span class="c-green">✓ blocked by Pi-hole</span></code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash — DNSSEC validation</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><code><span class="c-green">$</span> dig sigfail.verteiltesysteme.net @&lt;PI_IP&gt;
+<span class="c-gray">;; ->>HEADER<<- opcode: QUERY, status:</span> <span class="c-red">SERVFAIL</span>
+<span class="c-green">✓ invalid DNSSEC signature correctly rejected</span></code></pre>
+    </div>
+  </section>
+
+  <!-- 7. Results -->
+  <section class="section" id="results">
+    <h2 class="section-title">
+      <span data-lang="en">Results</span>
+      <span data-lang="fr">Résultats</span>
+    </h2>
+
+    <div data-lang="en">
+      <ul>
+        <li>No DNS query ever leaves the network unresolved by a third party</li>
+        <li>Ad and tracker domains blocked network-wide — no per-device config needed</li>
+        <li>DNSSEC enforced — invalid signatures are dropped</li>
+        <li>First-query latency ~8ms on LAN; cached queries &lt;1ms</li>
+        <li>Entire stack managed via two scripts; updates in one command</li>
+      </ul>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        The project is open-source under CC BY-NC 4.0. Clone it, adapt it, attribute it.
+      </div>
+    </div>
+    <div data-lang="fr">
+      <ul>
+        <li>Aucune requête DNS ne quitte le réseau sans être résolue localement</li>
+        <li>Domaines publicitaires et trackers bloqués à l'échelle du réseau — aucune config par appareil</li>
+        <li>DNSSEC appliqué — les signatures invalides sont rejetées</li>
+        <li>Latence première requête ~8ms sur LAN ; requêtes en cache &lt;1ms</li>
+        <li>Stack entière gérée via deux scripts ; mises à jour en une commande</li>
+      </ul>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        Le projet est open-source sous CC BY-NC 4.0. À cloner, adapter, attribuer.
+      </div>
+    </div>
+
+    <div class="tags">
+      <span class="tag">dns</span>
+      <span class="tag">pi-hole</span>
+      <span class="tag">unbound</span>
+      <span class="tag">docker</span>
+      <span class="tag">raspberry-pi</span>
+      <span class="tag">privacy</span>
+      <span class="tag">homelab</span>
+      <span class="tag">dnssec</span>
+      <span class="tag">self-hosted</span>
+    </div>
+  </section>
+
+  <footer class="article-footer">
+    <a class="back-link" href="https://cherifjebali.com">
+      <i class="fas fa-arrow-left"></i>
+      <span data-lang="en">Back to portfolio</span>
+      <span data-lang="fr">Retour au portfolio</span>
+    </a>
+    <a class="repo-link" href="https://github.com/cherifon/Ultimate-DNS-Shield" target="_blank" rel="noopener">
+      <i class="fab fa-github"></i>
+      <span data-lang="en">View on GitHub</span>
+      <span data-lang="fr">Voir sur GitHub</span>
+    </a>
+  </footer>
+
+</main>
+
+<script>
+  const themes = ['github','hacker','retro','matrix'];
+  let currentTheme = 'github';
+  let currentLang  = 'en';
+
+  function cycleTheme() {
+    currentTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
+    document.body.dataset.theme = currentTheme;
+  }
+
+  function toggleLang() {
+    currentLang = currentLang === 'en' ? 'fr' : 'en';
+    document.body.className = 'lang-' + currentLang;
+    document.getElementById('lang-btn').textContent = currentLang === 'en' ? 'FR' : 'EN';
+    document.documentElement.lang = currentLang;
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1800);
+    });
+  }
+</script>
+</body>
+</html>

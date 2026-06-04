@@ -143,6 +143,13 @@ body{background:var(--bg);font-family:'JetBrains Mono','Fira Code','Courier New'
 .v-proj-links{display:flex;gap:8px;flex-wrap:wrap}
 .v-proj-link{color:var(--green);text-decoration:none;font-size:.78rem;border:1px solid var(--border);padding:4px 10px;border-radius:4px;display:flex;align-items:center;gap:6px;transition:all .2s}
 .v-proj-link:hover{border-color:var(--green);background:var(--glow)}
+.v-card-full{grid-column:1/-1}
+.v-latest-articles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:4px}
+.v-latest-item{display:flex;flex-direction:column;gap:7px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;text-decoration:none;transition:all .2s;cursor:pointer}
+.v-latest-item:hover{border-color:var(--accent);box-shadow:0 0 16px var(--accent-glow);transform:translateY(-2px)}
+.v-latest-meta{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted)}
+.v-latest-title{color:var(--text);font-size:.83rem;font-weight:600;line-height:1.4}
+.v-latest-tags{display:flex;flex-wrap:wrap;gap:4px}
 .v-timeline{position:relative;padding-left:24px}
 .v-timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--border)}
 .v-tl-item{position:relative;margin-bottom:28px}

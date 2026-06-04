@@ -93,7 +93,7 @@ const T = {
       {icon:'fas fa-th-large',   cmd:'visual',           label:'Visual mode',       desc:'Switch to a graphical interface.'},
     ],
     sectionAbout:"About", sectionProjects:"Projects", sectionCerts:"Certifications",
-    sectionExp:"Experience", sectionContact:"Contact",
+    sectionExp:"Experience", sectionArticles:"Articles", sectionContact:"Contact",
     cardProfile:"Profile", cardEducation:"Education", cardSkills:"Skills",
     cardLanguages:"Languages", cardInterests:"Interests",
     profileDesc:['M1 Cyberdefense student at Ecole Hexagone (Versailles), combining rigorous academic training with intensive hands-on practice — CTF, pentest, Blue Team, home lab.'],
@@ -178,7 +178,7 @@ const T = {
       {icon:'fas fa-th-large',   cmd:'visual',           label:'Mode visuel',            desc:'Basculer vers une interface graphique.'},
     ],
     sectionAbout:"À propos", sectionProjects:"Projets", sectionCerts:"Certifications",
-    sectionExp:"Expériences", sectionContact:"Contact",
+    sectionExp:"Expériences", sectionArticles:"Articles", sectionContact:"Contact",
     cardProfile:"Profil", cardEducation:"Formation", cardSkills:"Compétences",
     cardLanguages:"Langues", cardInterests:"Intérêts",
     profileDesc:['Étudiant en M1 Cyberdéfense à l\'École Hexagone (Versailles), alliant formation académique rigoureuse et pratique intensive — CTF, pentest, Blue Team, home lab.'],
@@ -212,10 +212,12 @@ const DATA = {
     { id:"homelab",
       en:{ title:"Home Lab — Blue Team & Monitoring", tags:["Raspberry Pi","Pi-hole","DNS","Fail2ban","Cowrie","SIEM"],
            desc:"Active home-network infrastructure focused on detection and defence.",
-           points:["<strong>Pi-hole</strong> + <strong>Unbound</strong> recursive DNS on Raspberry Pi — tracker/ad blocking, no third-party DNS.","Iptables + Fail2ban — automatic SSH intrusion blocking.","Cowrie SSH honeypot — real attacker log collection (IPs, commands, payloads).","Local SIEM monitoring: log correlation, anomaly alerts."] },
+           points:["<strong>Pi-hole</strong> + <strong>Unbound</strong> recursive DNS on Raspberry Pi — tracker/ad blocking, no third-party DNS.","Iptables + Fail2ban — automatic SSH intrusion blocking.","Cowrie SSH honeypot — real attacker log collection (IPs, commands, payloads).","Local SIEM monitoring: log correlation, anomaly alerts."],
+           links:[{href:"/articles/ultimate-dns-shield",icon:"fas fa-file-alt",label:"Read article"},{href:"https://github.com/cherifon/Ultimate-DNS-Shield",icon:"fab fa-github",label:"GitHub Repo"}] },
       fr:{ title:"Home Lab Défensif — Blue Team & Monitoring", tags:["Raspberry Pi","Pi-hole","DNS","Fail2ban","Cowrie","SIEM"],
            desc:"Infrastructure réseau maison orientée détection et défense, opérationnelle en continu.",
-           points:["<strong>Pi-hole</strong> + résolveur DNS récursif <strong>Unbound</strong> — blocage trackers &amp; pubs, zéro dépendance DNS tiers.","Iptables + Fail2ban — blocage automatique des tentatives d'intrusion SSH.","Honeypot Cowrie SSH — logs d'attaquants réels (IPs, commandes, payloads).","Supervision SIEM locale : corrélation des logs, alertes sur comportements anormaux."] },
+           points:["<strong>Pi-hole</strong> + résolveur DNS récursif <strong>Unbound</strong> — blocage trackers &amp; pubs, zéro dépendance DNS tiers.","Iptables + Fail2ban — blocage automatique des tentatives d'intrusion SSH.","Honeypot Cowrie SSH — logs d'attaquants réels (IPs, commandes, payloads).","Supervision SIEM locale : corrélation des logs, alertes sur comportements anormaux."],
+           links:[{href:"/articles/ultimate-dns-shield",icon:"fas fa-file-alt",label:"Lire l'article"},{href:"https://github.com/cherifon/Ultimate-DNS-Shield",icon:"fab fa-github",label:"Dépôt GitHub"}] },
     },
     { id:"ctf",
       en:{ title:"Pentesting & CTF — HTB, TryHackMe, Hack This Site, Root-Me", tags:["Kali Linux","Burp Suite","Nmap","MITRE ATT&CK","CTF","Forensic"],
@@ -268,6 +270,20 @@ const DATA = {
            links:[{href:"https://github.com/cherifon/Gestionnaire_de_tournoi",icon:"fab fa-github",label:"Dépôt GitHub"}] },
     },
   ],
+  articles:[
+    { id:"ultimate-dns-shield",
+      en:{ title:"Ultimate DNS Shield — Self-hosted recursive DNS with Pi-hole + Unbound + Docker",
+           date:"2026-06-04", readTime:"8 min read",
+           tags:["DNS","Pi-hole","Unbound","Docker","Raspberry Pi","Privacy","Homelab"],
+           desc:"How I built a private, ad-free, recursive DNS server on a Raspberry Pi 4 — no third-party resolver ever sees your queries.",
+           href:"/articles/ultimate-dns-shield" },
+      fr:{ title:"Ultimate DNS Shield — DNS récursif auto-hébergé avec Pi-hole + Unbound + Docker",
+           date:"2026-06-04", readTime:"8 min de lecture",
+           tags:["DNS","Pi-hole","Unbound","Docker","Raspberry Pi","Privacy","Homelab"],
+           desc:"Comment j'ai construit un serveur DNS privé, sans pub et récursif sur un Raspberry Pi 4 — aucun résolveur tiers ne voit vos requêtes.",
+           href:"/articles/ultimate-dns-shield" },
+    },
+  ],
   certs:[
     {en:{title:"Introduction to Cybersecurity",  org:"Cisco Networking Academy",date:"Nov 2024"},
      fr:{title:"Introduction to Cybersecurity",  org:"Cisco Networking Academy",date:"Nov. 2024"}},
@@ -298,7 +314,7 @@ const DATA = {
 
 // ── Terminal filesystem ────────────────────────────────────────────
 function buildFS() {
-  const fs = { root:{ projets:{}, certifications:{}, experiences:{}, "contact.txt":null } };
+  const fs = { root:{ projets:{}, certifications:{}, experiences:{}, articles:{}, "contact.txt":null } };
   DATA.projects.forEach(p => {
     const fn = p[currentLang].title.replace(/[^a-zA-Z0-9]/g,'-').replace(/-+/g,'-').slice(0,38)+'.txt';
     fs.root.projets[fn] = p;
@@ -311,9 +327,14 @@ function buildFS() {
     const fn = (e[currentLang].role+'-'+e[currentLang].period).replace(/[^a-zA-Z0-9]/g,'-').replace(/-+/g,'-').slice(0,38)+'.txt';
     fs.root.experiences[fn] = e;
   });
+  DATA.articles.forEach(a => {
+    const fn = a.id+'.md';
+    fs.root.articles[fn] = a;
+  });
   fs.projets        = fs.root.projets;
   fs.certifications = fs.root.certifications;
   fs.experiences    = fs.root.experiences;
+  fs.articles       = fs.root.articles;
   return fs;
 }
 
@@ -326,6 +347,10 @@ function renderItem(item) {
   }
   if (d.org) {
     return `<div class="project-card"><h2>${d.title}</h2><p style="color:var(--muted);font-size:.82rem">${d.org} · <span style="color:var(--accent)">${d.date}</span></p></div>`;
+  }
+  if (d.href) {
+    const openLabel = currentLang==='fr' ? 'Ouvrir l\'article' : 'Open article';
+    return `<div class="project-card"><h2>${d.title}</h2><div class="tags">${(d.tags||[]).map(tg=>`<span class="tag">${tg}</span>`).join('')}</div><p style="color:var(--muted);font-size:.83rem;margin:8px 0">${d.desc||''}</p><p style="color:var(--muted);font-size:.78rem">${d.date} · ${d.readTime}</p><div class="project-links"><a href="${d.href}" class="project-links"><i class="fas fa-book-open"></i> ${openLabel}</a></div></div>`;
   }
   return null;
 }
@@ -430,7 +455,7 @@ function buildHelp() {
 function buildTree() {
   const fs = buildFS(); const s = t();
   let h = `<div class="tree-output"><span class="tree-dir">${s.treeTitle}</span><br>`;
-  ['projets','certifications','experiences'].forEach((dir,di,arr) => {
+  ['projets','certifications','experiences','articles'].forEach((dir,di,arr) => {
     const last = di===arr.length-1;
     h += `${last?'└──':'├──'} <span class="tree-dir">${dir}/</span><br>`;
     Object.keys(fs.root[dir]).forEach((f,fi,files) => {
@@ -511,6 +536,11 @@ function processCommand(raw) {
     if (tgt==='..'||tgt==='~'||tgt==='root') { currentDirectory='root'; respondText(t().dirChanged+' root','var(--green)'); }
     else if (fs[tgt]) { currentDirectory=tgt; respondText(t().dirChanged+' '+tgt,'var(--green)'); }
     else respondText(fmt(t().dirNotFound,tgt));
+  } else if (cmd.startsWith('open ')) {
+    const slug = parts[1];
+    const article = DATA.articles.find(a => a.id===slug || a.id+'.md'===slug);
+    if (article) { window.open(article[currentLang].href, '_self'); }
+    else respondText(fmt(t().fileNotFound, slug));
   } else if (cmd.startsWith('cat ')) {
     const fn   = parts[1];
     const item = fs[currentDirectory]?.[fn];
@@ -626,6 +656,7 @@ function buildVisual() {
   set('tab-projects', s.sectionProjects);
   set('tab-certs',    s.sectionCerts);
   set('tab-exp',      s.sectionExp);
+  set('tab-articles', s.sectionArticles);
   set('tab-contact',  s.sectionContact);
 
   // About
@@ -650,6 +681,17 @@ function buildVisual() {
         <div class="v-card-title"><i class="fas fa-heart"></i> ${s.cardInterests}</div>
         ${s.interests.map(i=>`<p>· ${i}</p>`).join('')}
       </div>
+    </div>
+    <div class="v-card v-card-full">
+      <div class="v-card-title"><i class="fas fa-newspaper"></i> ${currentLang==='fr'?'Derniers articles':'Latest articles'}</div>
+      <div class="v-latest-articles">${DATA.articles.slice(0,3).map(a=>{
+        const d=a[currentLang]||a.en;
+        return `<a class="v-latest-item" href="${d.href}">
+          <div class="v-latest-meta"><span>${d.date}</span><span style="color:var(--accent)">${d.readTime}</span></div>
+          <div class="v-latest-title">${d.title}</div>
+          <div class="v-latest-tags">${d.tags.slice(0,4).map(tg=>`<span class="v-proj-tag">${tg}</span>`).join('')}</div>
+        </a>`;
+      }).join('')}</div>
     </div>
   </div>`;
 
@@ -680,6 +722,21 @@ function buildVisual() {
       ${d.org?`<div class="v-tl-org">${d.org}</div>`:''}
       <div class="v-tl-tags">${(d.tags||[]).map(tg=>`<span class="v-tl-tag">${tg}</span>`).join('')}</div>
       <ul class="v-tl-points">${(d.points||[]).map(pt=>`<li>${pt}</li>`).join('')}</ul>
+    </div>`;
+  }).join('')}</div>`;
+
+  // Articles
+  $('v-articles').innerHTML = `<div class="v-project-grid">${DATA.articles.map(a=>{
+    const d = a[currentLang]||a.en;
+    return `<div class="v-proj-card" onclick="location.href='${d.href}'" style="cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:.72rem;color:var(--muted)">${d.date}</span>
+        <span style="font-size:.72rem;color:var(--accent)">${d.readTime}</span>
+      </div>
+      <div class="v-proj-title">${d.title}</div>
+      <div class="v-proj-tags">${d.tags.map(tg=>`<span class="v-proj-tag">${tg}</span>`).join('')}</div>
+      <div class="v-proj-desc">${d.desc}</div>
+      <div class="v-proj-links"><a class="v-proj-link" href="${d.href}" onclick="event.stopPropagation()"><i class="fas fa-book-open"></i>${currentLang==='fr'?'Lire l\'article':'Read article'}</a></div>
     </div>`;
   }).join('')}</div>`;
 
