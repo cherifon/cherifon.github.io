@@ -298,8 +298,8 @@
     </div>
   </div>
   <div class="topbar-right">
-    <button class="tb-btn" id="lang-btn" onclick="toggleLang()">FR</button>
-    <button class="tb-btn" onclick="cycleTheme()">theme</button>
+    <button class="tb-btn" id="lang-btn">FR</button>
+    <button class="tb-btn" id="theme-btn">theme</button>
     <a class="tb-btn" href="https://cherifjebali.com" style="text-decoration:none">~/portfolio</a>
   </div>
 </header>
@@ -397,7 +397,7 @@
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">docker-compose.yml (extract)</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code><span class="c-gray"># Internal bridge — 172.20.0.0/24</span>
 networks:
@@ -480,7 +480,7 @@ services:
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">bash</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code><span class="c-green">$</span> git clone https://github.com/cherifon/Ultimate-DNS-Shield.git
 <span class="c-green">$</span> cd Ultimate-DNS-Shield</code></pre>
@@ -496,7 +496,7 @@ services:
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">docker-compose.yml</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code>environment:
   TZ: <span class="c-yellow">Europe/Paris</span>          <span class="c-gray"># your timezone</span>
@@ -520,7 +520,7 @@ volumes:
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">bash</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code><span class="c-gray"># Preview (no changes applied)</span>
 <span class="c-green">$</span> sudo bash scripts/install.sh <span class="c-blue">--dry-run</span>
@@ -567,7 +567,7 @@ volumes:
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">bash</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code><span class="c-green">$</span> sudo bash scripts/security.sh</code></pre>
     </div>
@@ -607,7 +607,7 @@ volumes:
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">bash — normal resolution</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code><span class="c-green">$</span> dig github.com @&lt;PI_IP&gt;
 <span class="c-gray">;; Query time: 8 msec</span>
@@ -617,7 +617,7 @@ volumes:
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">bash — ad blocking</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code><span class="c-green">$</span> dig doubleclick.net @&lt;PI_IP&gt;
 <span class="c-gray">;; ANSWER SECTION:</span>
@@ -627,7 +627,7 @@ doubleclick.net.  <span class="c-blue">0</span> IN A <span class="c-red">0.0.0.0
     <div class="code-block">
       <div class="code-header">
         <span class="code-lang">bash — DNSSEC validation</span>
-        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <button class="copy-btn">copy</button>
       </div>
       <pre><code><span class="c-green">$</span> dig sigfail.verteiltesysteme.net @&lt;PI_IP&gt;
 <span class="c-gray">;; ->>HEADER<<- opcode: QUERY, status:</span> <span class="c-red">SERVFAIL</span>

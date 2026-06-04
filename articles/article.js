@@ -21,3 +21,11 @@ function copyCode(btn) {
     setTimeout(() => btn.textContent = 'copy', 1800);
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('lang-btn').addEventListener('click', toggleLang);
+  document.getElementById('theme-btn').addEventListener('click', cycleTheme);
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => copyCode(btn));
+  });
+});
