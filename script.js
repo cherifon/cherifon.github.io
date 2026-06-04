@@ -26,7 +26,8 @@ const bodyEl  = () => $('terminal-body');
 const inputLn = () => $('input-line');
 
 function appendBefore(el){ bodyEl().insertBefore(el, inputLn()); }
-function echoCmd(text){ const e=makeEl('div','command-line slide-in'); e.innerHTML=`<span class="prompt">cherif@kali:~$</span><span class="cmd-text" style="margin-left:8px">${text}</span>`; appendBefore(e); }
+const escHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function echoCmd(text){ const e=makeEl('div','command-line slide-in'); e.innerHTML=`<span class="prompt">cherif@kali:~$</span><span class="cmd-text" style="margin-left:8px">${escHtml(text)}</span>`; appendBefore(e); }
 function respond(html){ const e=makeEl('div','response slide-in'); e.innerHTML=html; appendBefore(e); }
 function respondText(text,col){ respond(`<p style="padding:4px 20px;color:${col||'var(--muted)'}">${text}</p>`); }
 function scrollDown(){ const b=bodyEl(); if(b) b.scrollTop=b.scrollHeight; }
@@ -467,6 +468,7 @@ function buildTree() {
 
 function runGrep(kw) {
   if (!kw) return `<p style="padding:4px 20px;color:var(--warn)">${t().grepUsage}</p>`;
+  const kw_safe = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const kl = kw.toLowerCase(), fs = buildFS(), res = [];
   ['projets','certifications','experiences'].forEach(dir => {
     Object.entries(fs.root[dir]).forEach(([fn, item]) => {
@@ -476,7 +478,7 @@ function runGrep(kw) {
         const raw = ((d.title||'')+(d.desc||'')+(d.points||[]).join(' ')).replace(/<[^>]+>/g,'');
         const idx = raw.toLowerCase().indexOf(kl);
         const s = Math.max(0,idx-25), e = Math.min(raw.length,idx+kw.length+25);
-        const snip = (s>0?'…':'')+raw.substring(s,e).replace(new RegExp(`(${kw})`,'gi'),`<span class="grep-hl">$1</span>`)+(e<raw.length?'…':'');
+        const snip = (s>0?'…':'')+raw.substring(s,e).replace(new RegExp(`(${kw_safe})`,'gi'),`<span class="grep-hl">$1</span>`)+(e<raw.length?'…':'');
         res.push(`<div class="grep-match"><span class="grep-file">${dir}/${fn}</span>: <span class="grep-text">${snip}</span></div>`);
       }
     });
@@ -728,7 +730,7 @@ function buildVisual() {
   // Articles
   $('v-articles').innerHTML = `<div class="v-project-grid">${DATA.articles.map(a=>{
     const d = a[currentLang]||a.en;
-    return `<div class="v-proj-card" onclick="location.href='${d.href}'" style="cursor:pointer">
+    return `<a class="v-proj-card v-article-card" href="${d.href}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <span style="font-size:.72rem;color:var(--muted)">${d.date}</span>
         <span style="font-size:.72rem;color:var(--accent)">${d.readTime}</span>
@@ -736,8 +738,8 @@ function buildVisual() {
       <div class="v-proj-title">${d.title}</div>
       <div class="v-proj-tags">${d.tags.map(tg=>`<span class="v-proj-tag">${tg}</span>`).join('')}</div>
       <div class="v-proj-desc">${d.desc}</div>
-      <div class="v-proj-links"><a class="v-proj-link" href="${d.href}" onclick="event.stopPropagation()"><i class="fas fa-book-open"></i>${currentLang==='fr'?'Lire l\'article':'Read article'}</a></div>
-    </div>`;
+      <div class="v-proj-links"><span class="v-proj-link"><i class="fas fa-book-open"></i>${currentLang==='fr'?'Lire l\'article':'Read article'}</span></div>
+    </a>`;
   }).join('')}</div>`;
 
   // Contact

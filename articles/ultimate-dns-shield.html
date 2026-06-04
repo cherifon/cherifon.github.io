@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
     /* ── Design tokens (mirrors main portfolio) ── */
@@ -697,30 +697,6 @@ doubleclick.net.  <span class="c-blue">0</span> IN A <span class="c-red">0.0.0.0
 
 </main>
 
-<script>
-  const themes = ['github','hacker','retro','matrix'];
-  let currentTheme = 'github';
-  let currentLang  = 'en';
-
-  function cycleTheme() {
-    currentTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
-    document.body.dataset.theme = currentTheme;
-  }
-
-  function toggleLang() {
-    currentLang = currentLang === 'en' ? 'fr' : 'en';
-    document.body.className = 'lang-' + currentLang;
-    document.getElementById('lang-btn').textContent = currentLang === 'en' ? 'FR' : 'EN';
-    document.documentElement.lang = currentLang;
-  }
-
-  function copyCode(btn) {
-    const pre = btn.closest('.code-block').querySelector('pre');
-    navigator.clipboard.writeText(pre.innerText).then(() => {
-      btn.textContent = 'copied!';
-      setTimeout(() => btn.textContent = 'copy', 1800);
-    });
-  }
-</script>
+<script src="article.js"></script>
 </body>
 </html>
