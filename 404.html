@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Page introuvable · Cherif Jebali</title>
+    <meta name="robots" content="noindex">
+    <link rel="canonical" href="https://cherifjebali.com/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#0d1117; --fg:#c9d1d9; --green:#3fb950; --muted:#8b949e; --accent:#58a6ff; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: var(--bg); color: var(--fg);
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            padding: 1.5rem;
+        }
+        .term {
+            width: 100%; max-width: 640px; border: 1px solid #30363d; border-radius: 10px;
+            background: #161b22; box-shadow: 0 16px 48px rgba(0,0,0,.5); overflow: hidden;
+        }
+        .bar { display: flex; gap: 8px; padding: 12px 16px; background: #21262d; border-bottom: 1px solid #30363d; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .r { background: #ff5f56; } .y { background: #ffbd2e; } .g { background: #27c93f; }
+        .body { padding: 1.75rem 1.5rem; line-height: 1.7; }
+        .prompt { color: var(--green); }
+        .path { color: var(--accent); }
+        h1 { font-size: 3.5rem; margin: .5rem 0; color: var(--green); }
+        p { color: var(--muted); margin: .4rem 0; }
+        a.cta {
+            display: inline-block; margin-top: 1.25rem; padding: .6rem 1.1rem;
+            color: var(--green); border: 1px solid var(--green); border-radius: 6px;
+            text-decoration: none; transition: background .15s, color .15s;
+        }
+        a.cta:hover { background: var(--green); color: var(--bg); }
+    </style>
+</head>
+<body>
+    <main class="term">
+        <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <div class="body">
+            <p><span class="prompt">cherif@kali:~$</span> cat <span class="path">page</span></p>
+            <h1>404</h1>
+            <p>cat: page : No such file or directory</p>
+            <p>La page demandée n'existe pas ou a été déplacée.</p>
+            <a class="cta" href="/">[ cd ~ ] Retour au portfolio</a>
+        </div>
+    </main>
+</body>
+</html>
