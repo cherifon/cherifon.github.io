@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy PDF Editor — Cherif Jebali</title>
+  <meta name="description" content="A self-hosted, LAN-only PDF editor with an encrypted vault, plausible deniability, and zero cloud dependency — running on a Raspberry Pi 4." />
+  <meta property="og:title" content="Privacy PDF Editor — Cherif Jebali" />
+  <meta property="og:description" content="Self-hosted PDF editor with Ghost Vault: ChaCha20 encryption, duress mode, and plausible deniability on a Raspberry Pi 4." />
+  <meta property="og:url" content="https://cherifjebali.com/articles/privacy-pdf-editor" />
+  <meta property="og:type" content="article" />
+  <link rel="canonical" href="https://cherifjebali.com/articles/privacy-pdf-editor" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+      --text: #c9d1d9; --text2: #8b949e; --text3: #6e7681;
+      --accent: #58a6ff; --accent2: #3fb950; --accent3: #f78166;
+      --border: #30363d; --glow: rgba(88,166,255,.15);
+      --radius: 6px; --font: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    }
+    [data-theme="hacker"] {
+      --bg:#000; --bg2:#0a0a0a; --bg3:#111;
+      --text:#00ff41; --text2:#00cc33; --text3:#008822;
+      --accent:#00ff41; --accent2:#00cc33; --accent3:#ff0040;
+      --border:#00ff4133; --glow:rgba(0,255,65,.12);
+    }
+    [data-theme="retro"] {
+      --bg:#1a0a00; --bg2:#2a1500; --bg3:#3a2000;
+      --text:#ffb347; --text2:#cc8833; --text3:#886622;
+      --accent:#ff6a00; --accent2:#ffb347; --accent3:#ff3300;
+      --border:#ff6a0044; --glow:rgba(255,106,0,.12);
+    }
+    [data-theme="matrix"] {
+      --bg:#000; --bg2:#001100; --bg3:#002200;
+      --text:#00ff00; --text2:#00cc00; --text3:#009900;
+      --accent:#00ff00; --accent2:#00ffaa; --accent3:#ff0000;
+      --border:#00ff0033; --glow:rgba(0,255,0,.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; height: 42px;
+    }
+    .topbar-left { display: flex; align-items: center; gap: .75rem; }
+    .win-btns { display: flex; gap: .4rem; }
+    .win-btn { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
+    .win-btn.close  { background: #ff5f57; }
+    .win-btn.min    { background: #febc2e; }
+    .win-btn.max    { background: #28c840; }
+    .topbar-path { font-size: .72rem; color: var(--text2); }
+    .topbar-path .prompt { color: var(--accent2); }
+    .topbar-path .sep    { color: var(--text3); }
+    .topbar-right { display: flex; gap: .5rem; }
+    .tb-btn {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2); font-family: var(--font); font-size: .72rem;
+      padding: .25rem .6rem; border-radius: var(--radius);
+      cursor: pointer; transition: all .2s;
+    }
+    .tb-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    .container { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    .breadcrumb { font-size: .72rem; color: var(--text3); margin-bottom: 2rem; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb .sep { margin: 0 .4rem; }
+
+    .article-header { margin-bottom: 2.5rem; }
+    .article-tag {
+      display: inline-block;
+      background: var(--bg3); border: 1px solid var(--accent);
+      color: var(--accent); font-size: .68rem; padding: .15rem .5rem;
+      border-radius: var(--radius); margin-bottom: .75rem;
+    }
+    .article-title { font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: .75rem; }
+    .article-meta { font-size: .72rem; color: var(--text3); display: flex; flex-wrap: wrap; gap: 1rem; }
+    .article-meta span { display: flex; align-items: center; gap: .35rem; }
+    .article-meta i { color: var(--accent2); }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    .toc {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 2.5rem;
+    }
+    .toc-title { font-size: .72rem; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; }
+    .toc ol { padding-left: 1.25rem; }
+    .toc li { margin: .25rem 0; }
+    .toc a { color: var(--text2); text-decoration: none; font-size: .82rem; transition: color .2s; }
+    .toc a:hover { color: var(--accent); }
+
+    .section { margin-bottom: 2.5rem; }
+    h2.section-title { font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
+    h2.section-title::before { content: "## "; color: var(--text3); }
+    h3.sub-title { font-size: .88rem; font-weight: 600; color: var(--accent2); margin: 1.25rem 0 .6rem; }
+    h3.sub-title::before { content: "### "; color: var(--text3); }
+    p { margin-bottom: .9rem; }
+    a { color: var(--accent); }
+
+    .code-block { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 1rem 0; }
+    .code-header { background: var(--bg3); border-bottom: 1px solid var(--border); padding: .35rem .75rem; display: flex; align-items: center; justify-content: space-between; }
+    .code-lang { font-size: .68rem; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+    .copy-btn { background: none; border: none; color: var(--text3); font-family: var(--font); font-size: .68rem; cursor: pointer; transition: color .2s; padding: 0; }
+    .copy-btn:hover { color: var(--accent2); }
+    pre { padding: 1rem 1.25rem; overflow-x: auto; font-size: .82rem; line-height: 1.6; tab-size: 2; }
+    code { color: var(--text); }
+    .c-green  { color: #3fb950; }
+    .c-blue   { color: #58a6ff; }
+    .c-orange { color: #ff6a00; }
+    .c-red    { color: #f78166; }
+    .c-gray   { color: #8b949e; }
+    .c-yellow { color: #e3b341; }
+
+    p code, li code { background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; padding: .1em .35em; font-size: .85em; color: var(--accent2); }
+
+    .arch-diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; font-size: .82rem; line-height: 2; margin: 1rem 0; }
+    .arch-diagram .node  { color: var(--accent); font-weight: 600; }
+    .arch-diagram .arrow { color: var(--text3); }
+    .arch-diagram .desc  { color: var(--text2); font-size: .75rem; }
+
+    .callout { border-radius: var(--radius); padding: .85rem 1.1rem; margin: 1rem 0; font-size: .84rem; border-left: 3px solid; }
+    .callout.info    { background: rgba(88,166,255,.07);  border-color: var(--accent); }
+    .callout.success { background: rgba(63,185,80,.07);   border-color: var(--accent2); }
+    .callout.warn    { background: rgba(227,179,65,.07);  border-color: #e3b341; color: #e3b341; }
+    .callout i { margin-right: .4rem; }
+
+    ul, ol { padding-left: 1.4rem; margin-bottom: .9rem; }
+    li { margin: .3rem 0; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+    .tag { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-size: .68rem; padding: .15rem .5rem; border-radius: var(--radius); }
+
+    .article-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .back-link { color: var(--accent); text-decoration: none; font-size: .82rem; display: flex; align-items: center; gap: .4rem; transition: gap .2s; }
+    .back-link:hover { gap: .6rem; }
+    .repo-link { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); text-decoration: none; font-size: .78rem; padding: .4rem .85rem; border-radius: var(--radius); display: flex; align-items: center; gap: .4rem; transition: all .2s; }
+    .repo-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    [data-lang] { display: none; }
+    .lang-en [data-lang="en"],
+    .lang-fr [data-lang="fr"] { display: block; }
+    span[data-lang] { display: none; }
+    .lang-en span[data-lang="en"],
+    .lang-fr span[data-lang="fr"] { display: inline; }
+
+    @media (max-width: 600px) {
+      .article-title { font-size: 1.2rem; }
+      .topbar-path   { display: none; }
+      pre            { font-size: .75rem; }
+    }
+  </style>
+</head>
+
+<body data-theme="github" class="lang-en">
+
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="win-btns">
+      <span class="win-btn close"></span>
+      <span class="win-btn min"></span>
+      <span class="win-btn max"></span>
+    </div>
+    <div class="topbar-path">
+      <span class="prompt">cherif@kali</span><span class="sep">:</span><span class="c-blue">~/articles/privacy-pdf-editor</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="tb-btn" id="lang-btn">FR</button>
+    <button class="tb-btn" id="theme-btn">theme</button>
+    <a class="tb-btn" href="https://cherifjebali.com" style="text-decoration:none">~/portfolio</a>
+  </div>
+</header>
+
+<main class="container">
+
+  <nav class="breadcrumb">
+    <a href="https://cherifjebali.com">cherifjebali.com</a>
+    <span class="sep">/</span>articles
+    <span class="sep">/</span>privacy-pdf-editor
+  </nav>
+
+  <header class="article-header">
+    <span class="article-tag">privacy · self-hosted · cryptography</span>
+    <h1 class="article-title">
+      <span data-lang="en">Privacy PDF Editor — Self-hosted PDF toolkit with encrypted Ghost Vault on Raspberry Pi 4</span>
+      <span data-lang="fr">Privacy PDF Editor — Éditeur PDF auto-hébergé avec Ghost Vault chiffré sur Raspberry Pi 4</span>
+    </h1>
+    <div class="article-meta">
+      <span><i class="fas fa-calendar-alt"></i> 2026-06-18</span>
+      <span><i class="fas fa-clock"></i> <span data-lang="en">10 min read</span><span data-lang="fr">10 min de lecture</span></span>
+      <span><i class="fas fa-tag"></i> Python · FastAPI · ChaCha20 · Raspberry Pi · Docker</span>
+    </div>
+  </header>
+
+  <hr class="divider" />
+
+  <nav class="toc">
+    <div class="toc-title">
+      <span data-lang="en">Table of contents</span>
+      <span data-lang="fr">Sommaire</span>
+    </div>
+    <ol>
+      <li><a href="#why"><span data-lang="en">Why build this?</span><span data-lang="fr">Pourquoi ce projet ?</span></a></li>
+      <li><a href="#editor"><span data-lang="en">PDF Editor</span><span data-lang="fr">Éditeur PDF</span></a></li>
+      <li><a href="#vault"><span data-lang="en">Ghost Vault — Plausible deniability</span><span data-lang="fr">Ghost Vault — Déni plausible</span></a></li>
+      <li><a href="#crypto"><span data-lang="en">Cryptography</span><span data-lang="fr">Cryptographie</span></a></li>
+      <li><a href="#architecture"><span data-lang="en">Architecture</span><span data-lang="fr">Architecture</span></a></li>
+      <li><a href="#deploy"><span data-lang="en">Deployment on Pi4</span><span data-lang="fr">Déploiement sur Pi4</span></a></li>
+      <li><a href="#results"><span data-lang="en">Results</span><span data-lang="fr">Résultats</span></a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. Why -->
+  <section class="section" id="why">
+    <h2 class="section-title">
+      <span data-lang="en">Why build this?</span>
+      <span data-lang="fr">Pourquoi ce projet ?</span>
+    </h2>
+    <div data-lang="en">
+      <p>Every time you use Smallpdf, ILovePDF, or any cloud-based PDF tool, your documents transit through third-party servers. For personal documents — contracts, IDs, financial reports — that is an unnecessary risk.</p>
+      <p>The goal of <strong>Privacy PDF Editor</strong> is to give full control back: a self-hosted tool that runs entirely on a LAN, where files never leave your infrastructure. The editor handles common PDF operations locally in the browser; the backend on a Raspberry Pi 4 handles encryption, compression, and vault storage.</p>
+      <div class="callout info">
+        <i class="fas fa-info-circle"></i>
+        <span data-lang="en">Pages render 100% locally via PDF.js — nothing is uploaded until you click Export. All JS libraries are vendored: no CDN, no external requests.</span>
+      </div>
+    </div>
+    <div data-lang="fr">
+      <p>À chaque utilisation de Smallpdf, ILovePDF ou n'importe quel outil PDF en ligne, vos documents transitent par des serveurs tiers. Pour des documents personnels — contrats, pièces d'identité, relevés financiers — c'est un risque inutile.</p>
+      <p>L'objectif de <strong>Privacy PDF Editor</strong> est de reprendre le contrôle : un outil auto-hébergé qui tourne entièrement en LAN, où les fichiers ne quittent jamais votre infrastructure. L'éditeur gère les opérations PDF courantes localement dans le navigateur ; le backend sur un Raspberry Pi 4 s'occupe du chiffrement, de la compression et du stockage vault.</p>
+      <div class="callout info">
+        <i class="fas fa-info-circle"></i>
+        Les pages sont rendues à 100% localement via PDF.js — rien n'est envoyé avant de cliquer sur Export. Toutes les librairies JS sont vendorisées : pas de CDN, pas de requêtes externes.
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Editor -->
+  <section class="section" id="editor">
+    <h2 class="section-title">
+      <span data-lang="en">PDF Editor</span>
+      <span data-lang="fr">Éditeur PDF</span>
+    </h2>
+
+    <div data-lang="en">
+      <p>The editor is a single-page app that covers the most common PDF operations without ever sending files to a cloud service:</p>
+      <ul>
+        <li><strong>Pages:</strong> merge multiple PDFs, reorder with drag &amp; drop, rotate, delete, extract. Range shortcuts (<code>1-3,5</code>) for bulk actions.</li>
+        <li><strong>Watermark:</strong> tiled diagonal text, configurable opacity and font size.</li>
+        <li><strong>Metadata:</strong> live reader showing author, dates, software. Four modes: keep / clear / random (decoy values) / custom.</li>
+        <li><strong>Anonymize:</strong> remove active JavaScript and auto-actions; full wipe (XMP + <code>/ID</code> + revision history); rasterize to image for maximum anonymization.</li>
+        <li><strong>Compress:</strong> three levels via Ghostscript (if available) or pikepdf.</li>
+        <li><strong>Unlock:</strong> remove AES-256 PDF encryption.</li>
+        <li><strong>Privacy scan:</strong> real-time detection of author, creation dates, XMP metadata, embedded JavaScript, annotations, form fields, signatures — with a privacy score. Runs 100% client-side.</li>
+      </ul>
+    </div>
+    <div data-lang="fr">
+      <p>L'éditeur est une single-page app qui couvre les opérations PDF les plus courantes sans jamais envoyer les fichiers vers un service cloud :</p>
+      <ul>
+        <li><strong>Pages :</strong> fusionner plusieurs PDFs, réordonner par drag &amp; drop, pivoter, supprimer, extraire. Raccourcis par plage (<code>1-3,5</code>) pour les actions en masse.</li>
+        <li><strong>Filigrane :</strong> texte diagonal en mosaïque, opacité et taille de police configurables.</li>
+        <li><strong>Métadonnées :</strong> lecteur en temps réel affichant auteur, dates, logiciel. Quatre modes : garder / effacer / aléatoire (valeurs leurres) / personnalisé.</li>
+        <li><strong>Anonymiser :</strong> suppression du JavaScript actif et des auto-actions ; nettoyage complet (XMP + <code>/ID</code> + historique de révision) ; rastérisation en image pour une anonymisation maximale.</li>
+        <li><strong>Compresser :</strong> trois niveaux via Ghostscript (si disponible) ou pikepdf.</li>
+        <li><strong>Déverrouiller :</strong> suppression du chiffrement AES-256 d'un PDF.</li>
+        <li><strong>Scan de confidentialité :</strong> détection en temps réel de l'auteur, des dates de création, des métadonnées XMP, du JavaScript embarqué, des annotations, des champs de formulaire, des signatures — avec un score de confidentialité. Fonctionne à 100% côté client.</li>
+      </ul>
+    </div>
+
+    <div class="callout warn">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span data-lang="en"><strong>Metadata → clear / random</strong> strips <code>/Info</code> but does not remove XMP or revision history. For a strong guarantee, use <em>full metadata wipe</em> combined with <em>remove active content</em>, or rasterize.</span>
+      <span data-lang="fr"><strong>Métadonnées → effacer / aléatoire</strong> supprime <code>/Info</code> mais pas le XMP ni l'historique de révision. Pour une garantie solide, utiliser <em>nettoyage complet</em> combiné à <em>supprimer le contenu actif</em>, ou rastériser.</span>
+    </div>
+  </section>
+
+  <!-- 3. Vault -->
+  <section class="section" id="vault">
+    <h2 class="section-title">
+      <span data-lang="en">Ghost Vault — Plausible deniability</span>
+      <span data-lang="fr">Ghost Vault — Déni plausible</span>
+    </h2>
+
+    <div data-lang="en">
+      <p>The Ghost Vault is the most technically interesting part of the project. It is an encrypted file store where each file supports multiple passwords — each opening a different document. This is <strong>plausible deniability</strong>: under coercion, you can reveal a secondary password that shows an innocent decoy document, while the real document remains protected.</p>
+      <p>The vault is a single directory (<code>data/</code>). Each file is an opaque blob that looks like random bytes — no header, no identifiable structure. The file explorer lists all vault files; a password is required to open each one.</p>
+    </div>
+    <div data-lang="fr">
+      <p>Le Ghost Vault est la partie techniquement la plus intéressante du projet. C'est un stockage de fichiers chiffré où chaque fichier supporte plusieurs mots de passe — chacun ouvrant un document différent. C'est le <strong>déni plausible</strong> : sous contrainte, vous pouvez révéler un mot de passe secondaire qui affiche un document leurre innocent, pendant que le vrai document reste protégé.</p>
+      <p>Le vault est un seul répertoire (<code>data/</code>). Chaque fichier est un blob opaque qui ressemble à des octets aléatoires — pas d'en-tête, pas de structure identifiable. L'explorateur de fichiers liste tous les fichiers du vault ; un mot de passe est requis pour ouvrir chacun d'eux.</p>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">Container format</span>
+      <span data-lang="fr">Format du conteneur</span>
+    </h3>
+
+    <div class="arch-diagram">
+      <div><span class="node">BLOB</span> <span class="c-gray">= salt (16 B) + 12 fixed-size cells</span></div>
+      <div><span style="margin-left:1rem"></span><span class="arrow">├──</span> <span class="c-blue">cell 0</span>  <span class="c-gray">nonce (12 B) + ciphertext (ChaCha20-Poly1305)</span></div>
+      <div><span style="margin-left:1rem"></span><span class="arrow">├──</span> <span class="c-gray">cell 1 … 10</span>  <span class="c-gray">real documents or random noise</span></div>
+      <div><span style="margin-left:1rem"></span><span class="arrow">└──</span> <span class="c-gray">cell 11</span>  <span class="c-gray">nonce + ciphertext</span></div>
+    </div>
+
+    <div data-lang="en">
+      <p>Four fixed tiers determine file size: 256 KB, 1 MB, 4 MB, 16 MB. Unused cells are filled with cryptographically random noise. An observer can infer the tier from the file size, but nothing else — not the number of documents, not whether any cell is real or noise.</p>
+    </div>
+    <div data-lang="fr">
+      <p>Quatre paliers fixes déterminent la taille du fichier : 256 Ko, 1 Mo, 4 Mo, 16 Mo. Les cellules inutilisées sont remplies de bruit aléatoire cryptographique. Un observateur peut déduire le palier depuis la taille du fichier, mais rien d'autre — pas le nombre de documents, pas si une cellule est réelle ou du bruit.</p>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">Duress mode</span>
+      <span data-lang="fr">Mode de contrainte</span>
+    </h3>
+
+    <div data-lang="en">
+      <p>Each vault file can have a <em>duress password</em>. When used, two things happen atomically:</p>
+      <ol>
+        <li>The decoy PDF is returned to the requester.</li>
+        <li>The real document's cell is overwritten with random bytes and flushed to disk (<code>fsync</code>) — a cryptographic shred that is unrecoverable, even with disk forensics.</li>
+      </ol>
+      <div class="callout warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span data-lang="en">The shred is irreversible. There is no undo. The duress password destroys the real cell permanently.</span>
+      </div>
+    </div>
+    <div data-lang="fr">
+      <p>Chaque fichier vault peut avoir un <em>mot de passe de contrainte</em>. Quand il est utilisé, deux choses se produisent de manière atomique :</p>
+      <ol>
+        <li>Le PDF leurre est retourné au demandeur.</li>
+        <li>La cellule du vrai document est écrasée avec des octets aléatoires et vidée sur le disque (<code>fsync</code>) — une destruction cryptographique non récupérable, même avec de la forensique disque.</li>
+      </ol>
+      <div class="callout warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        La destruction est irréversible. Il n'y a pas d'annulation. Le mot de passe de contrainte détruit définitivement la cellule réelle.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Crypto -->
+  <section class="section" id="crypto">
+    <h2 class="section-title">
+      <span data-lang="en">Cryptography</span>
+      <span data-lang="fr">Cryptographie</span>
+    </h2>
+
+    <div data-lang="en">
+      <p>Every design decision prioritises forward secrecy and resistance to offline attacks:</p>
+    </div>
+    <div data-lang="fr">
+      <p>Chaque décision de conception privilégie la confidentialité persistante et la résistance aux attaques hors ligne :</p>
+    </div>
+
+    <h3 class="sub-title">Key derivation — scrypt</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">python</span>
+        <button class="copy-btn">copy</button>
+      </div>
+      <pre><code>key = hashlib.scrypt(
+    password.encode(),
+    salt=salt,          <span class="c-gray"># 16 B random, stored in blob</span>
+    n=<span class="c-blue">2**15</span>, r=<span class="c-blue">8</span>, p=<span class="c-blue">1</span>,  <span class="c-gray"># ~200 ms on Pi4</span>
+    dklen=<span class="c-blue">64</span>
+)
+chacha_key  = key[<span class="c-blue">:32</span>]   <span class="c-gray"># ChaCha20-Poly1305 key</span>
+probe_seed  = key[<span class="c-blue">32:</span>]   <span class="c-gray"># cell probe order seed</span></code></pre>
+    </div>
+
+    <div data-lang="en">
+      <p>The <code>probe_seed</code> determines the order in which cells are tried for a given password — this is what makes each password map to a deterministic, unique cell without any index or lookup table stored in the blob.</p>
+    </div>
+    <div data-lang="fr">
+      <p>Le <code>probe_seed</code> détermine l'ordre dans lequel les cellules sont essayées pour un mot de passe donné — c'est ce qui fait que chaque mot de passe pointe vers une cellule déterministe et unique sans aucun index ni table de correspondance stocké dans le blob.</p>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">Encryption — ChaCha20-Poly1305</span>
+      <span data-lang="fr">Chiffrement — ChaCha20-Poly1305</span>
+    </h3>
+    <div data-lang="en">
+      <ul>
+        <li>Authenticated encryption: tampering with the ciphertext is detectable.</li>
+        <li>12-byte random nonce per cell, stored alongside the ciphertext.</li>
+        <li>Wrong password: scrypt produces a different key, Poly1305 authentication fails — the cell is simply skipped.</li>
+      </ul>
+    </div>
+    <div data-lang="fr">
+      <ul>
+        <li>Chiffrement authentifié : toute falsification du texte chiffré est détectable.</li>
+        <li>Nonce aléatoire de 12 octets par cellule, stocké avec le texte chiffré.</li>
+        <li>Mauvais mot de passe : scrypt produit une clé différente, l'authentification Poly1305 échoue — la cellule est simplement ignorée.</li>
+      </ul>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">asyncio offloading</span>
+      <span data-lang="fr">Offloading asyncio</span>
+    </h3>
+    <div data-lang="en">
+      <p>scrypt is CPU-intensive (~200 ms on Pi4). Running it directly in an async route would block the FastAPI event loop. All scrypt calls are offloaded to a thread pool via <code>asyncio.to_thread</code>.</p>
+    </div>
+    <div data-lang="fr">
+      <p>scrypt est gourmand en CPU (~200 ms sur Pi4). L'exécuter directement dans une route async bloquerait la boucle d'événements FastAPI. Tous les appels scrypt sont déportés dans un pool de threads via <code>asyncio.to_thread</code>.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">python</span>
+        <button class="copy-btn">copy</button>
+      </div>
+      <pre><code><span class="c-gray"># Non-blocking — event loop stays free during KDF</span>
+pdf = await asyncio.to_thread(vault_store.open_file, file_id, password)</code></pre>
+    </div>
+  </section>
+
+  <!-- 5. Architecture -->
+  <section class="section" id="architecture">
+    <h2 class="section-title">Architecture</h2>
+
+    <div data-lang="en">
+      <p>Three components, all LAN-only. The frontend never makes requests to external services; the backend never writes decrypted content to disk.</p>
+    </div>
+    <div data-lang="fr">
+      <p>Trois composants, tous en LAN uniquement. Le frontend ne fait jamais de requêtes vers des services externes ; le backend n'écrit jamais le contenu déchiffré sur le disque.</p>
+    </div>
+
+    <div class="arch-diagram">
+      <div><span class="node">Browser</span> <span class="c-gray">(PC — python -m http.server 3000)</span></div>
+      <div><span style="margin-left:1rem"></span><span class="arrow">├──</span> <span class="c-blue">PDF.js</span> <span class="c-gray">renders pages locally — no upload until Export</span></div>
+      <div><span style="margin-left:1rem"></span><span class="arrow">└──►</span> <span class="node">FastAPI backend</span> <span class="c-gray">(Pi4 — port 8000)</span></div>
+      <div><span style="margin-left:5rem"></span><span class="arrow">├──</span> <span class="c-green">POST /api/organize</span>  <span class="c-gray">merge · watermark · anonymize · compress</span></div>
+      <div><span style="margin-left:5rem"></span><span class="arrow">├──</span> <span class="c-green">POST /api/unlock</span>    <span class="c-gray">remove PDF password</span></div>
+      <div><span style="margin-left:5rem"></span><span class="arrow">└──►</span> <span class="node">Vault routes</span></div>
+      <div><span style="margin-left:9rem"></span><span class="arrow">└──►</span> <span class="c-yellow">data/</span>  <span class="c-gray">opaque blobs on disk</span></div>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">Security headers</span>
+      <span data-lang="fr">En-têtes de sécurité</span>
+    </h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">python — FastAPI middleware</span>
+        <button class="copy-btn">copy</button>
+      </div>
+      <pre><code>response.headers[<span class="c-yellow">"X-Content-Type-Options"</span>] = <span class="c-yellow">"nosniff"</span>
+response.headers[<span class="c-yellow">"X-Frame-Options"</span>]       = <span class="c-yellow">"DENY"</span>
+response.headers[<span class="c-yellow">"Referrer-Policy"</span>]       = <span class="c-yellow">"no-referrer"</span></code></pre>
+    </div>
+
+    <div data-lang="en">
+      <p>Every PDF upload is validated against the <code>%PDF</code> magic bytes before processing. Passwords are rejected below 8 characters. CORS is restricted to LAN origins.</p>
+    </div>
+    <div data-lang="fr">
+      <p>Chaque upload PDF est validé contre les magic bytes <code>%PDF</code> avant traitement. Les mots de passe de moins de 8 caractères sont rejetés. Le CORS est restreint aux origines LAN.</p>
+    </div>
+  </section>
+
+  <!-- 6. Deploy -->
+  <section class="section" id="deploy">
+    <h2 class="section-title">
+      <span data-lang="en">Deployment on Pi4</span>
+      <span data-lang="fr">Déploiement sur Pi4</span>
+    </h2>
+
+    <h3 class="sub-title">
+      <span data-lang="en">Backend (Pi4)</span>
+      <span data-lang="fr">Backend (Pi4)</span>
+    </h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn">copy</button>
+      </div>
+      <pre><code><span class="c-green">$</span> scp -r backend pi@<span class="c-blue">&lt;pi-ip&gt;</span>:~/pdf-tools-backend
+<span class="c-green">$</span> ssh pi@<span class="c-blue">&lt;pi-ip&gt;</span>
+<span class="c-green">$</span> cd ~/pdf-tools-backend && docker compose up -d --build</code></pre>
+    </div>
+
+    <h3 class="sub-title">
+      <span data-lang="en">Frontend (PC)</span>
+      <span data-lang="fr">Frontend (PC)</span>
+    </h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn">copy</button>
+      </div>
+      <pre><code><span class="c-green">$</span> python -m http.server <span class="c-blue">3000</span> --directory frontend</code></pre>
+    </div>
+
+    <div data-lang="en">
+      <p>Open <code>http://localhost:3000</code>, set the backend URL to <code>http://&lt;pi-ip&gt;:8000</code> and save. The indicator turns green when the Pi responds. The backend URL is stored in <code>localStorage</code> — no config file needed.</p>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        No Node.js, no npm, no build step required to run the frontend. The JS libraries (PDF.js, SortableJS) are vendored in <code>frontend/lib/</code> and committed to git.
+      </div>
+    </div>
+    <div data-lang="fr">
+      <p>Ouvrir <code>http://localhost:3000</code>, définir l'URL du backend sur <code>http://&lt;pi-ip&gt;:8000</code> et sauvegarder. L'indicateur devient vert quand le Pi répond. L'URL du backend est stockée dans <code>localStorage</code> — pas de fichier de configuration nécessaire.</p>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        Aucun Node.js, npm ou étape de build requis pour lancer le frontend. Les librairies JS (PDF.js, SortableJS) sont vendorisées dans <code>frontend/lib/</code> et commitées dans git.
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Results -->
+  <section class="section" id="results">
+    <h2 class="section-title">
+      <span data-lang="en">Results</span>
+      <span data-lang="fr">Résultats</span>
+    </h2>
+
+    <div data-lang="en">
+      <ul>
+        <li>PDF files never touch third-party servers — editor, vault, and all processing stay on the LAN.</li>
+        <li>Ghost Vault provides plausible deniability: wrong password returns nothing; duress password destroys the real cell.</li>
+        <li>scrypt KDF makes offline brute-force expensive (~200 ms per attempt on Pi4 hardware).</li>
+        <li>No CDN dependency: the tool works on an air-gapped network.</li>
+        <li>Full regression test suite covers the vault, duress mode, pagination, and path-traversal protection.</li>
+      </ul>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        Open-source under AGPL-3.0. Self-host it on any machine that runs Docker.
+      </div>
+    </div>
+    <div data-lang="fr">
+      <ul>
+        <li>Les fichiers PDF ne touchent jamais des serveurs tiers — éditeur, vault et tout le traitement restent en LAN.</li>
+        <li>Le Ghost Vault offre un déni plausible : un mauvais mot de passe ne retourne rien ; le mot de passe de contrainte détruit la cellule réelle.</li>
+        <li>La KDF scrypt rend le brute-force hors ligne coûteux (~200 ms par tentative sur le hardware Pi4).</li>
+        <li>Aucune dépendance CDN : l'outil fonctionne sur un réseau isolé.</li>
+        <li>Suite de tests de régression complète couvrant le vault, le mode contrainte, la pagination et la protection contre le path traversal.</li>
+      </ul>
+      <div class="callout success">
+        <i class="fas fa-check-circle"></i>
+        Open-source sous AGPL-3.0. À auto-héberger sur n'importe quelle machine qui fait tourner Docker.
+      </div>
+    </div>
+
+    <div class="tags">
+      <span class="tag">python</span>
+      <span class="tag">fastapi</span>
+      <span class="tag">chacha20</span>
+      <span class="tag">scrypt</span>
+      <span class="tag">raspberry-pi</span>
+      <span class="tag">docker</span>
+      <span class="tag">privacy</span>
+      <span class="tag">self-hosted</span>
+      <span class="tag">pdf</span>
+      <span class="tag">cryptography</span>
+    </div>
+  </section>
+
+  <footer class="article-footer">
+    <a class="back-link" href="https://cherifjebali.com">
+      <i class="fas fa-arrow-left"></i>
+      <span data-lang="en">Back to portfolio</span>
+      <span data-lang="fr">Retour au portfolio</span>
+    </a>
+    <a class="repo-link" href="https://github.com/cherifon/Privacy-PDF-Editor" target="_blank" rel="noopener">
+      <i class="fab fa-github"></i>
+      <span data-lang="en">View on GitHub</span>
+      <span data-lang="fr">Voir sur GitHub</span>
+    </a>
+  </footer>
+
+</main>
+
+<script src="article.js"></script>
+</body>
+</html>
